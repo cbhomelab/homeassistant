@@ -1,10 +1,10 @@
 sensor:
   - platform: sonarr_upcoming_media
-    api_key: f3f8aad032a04ff2b1450d042bf80a42
-    host: 10.80.0.41
+    api_key: !secret sonarr_key
+    host: !secret sonarr_host
   - platform: radarr_upcoming_media
-    api_key: 41c84dbd131b4987876ba1c9eddbf845
-    host: 10.80.0.42
+    api_key: !secret radarr_key
+    host: !secret radarr_host
   - platform: time_date
     display_options:
       - "time"
@@ -12,31 +12,31 @@ sensor:
       - "date"
   - platform: mqtt_room
     name: "Christian's iPhone BLE"
-    device_id: "irk_53d884dd6c8e5ebe23075740e99dd622"
-    state_topic: 'espresense/devices/irk_53d884dd6c8e5ebe23075740e99dd622'
+    device_id: !secret cb_iphone_ble_id
+    state_topic: !secret cb_iphone_ble_topic
     timeout: 5
     away_timeout: 120
   - platform: mqtt_room
     name: "Christian's Watch BLE"
-    device_id: "irk_33afe625792bda313c35920f6fc932e9"
-    state_topic: 'espresense/devices/irk_33afe625792bda313c35920f6fc932e9'
+    device_id: !secret cb_watch_ble_id
+    state_topic: !secret cb_watch_ble_topic
     timeout: 5
     away_timeout: 120
   - platform: mqtt_room
     name: "Carley's iPhone BLE"
-    device_id: "carley_phone"
-    state_topic: 'espresense/devices/carley_phone'
+    device_id: !secret cf_iphone_ble_id
+    state_topic: !secret cf_iphone_ble_topic
     timeout: 5
     away_timeout: 120
   - platform: mqtt_room
     name: "Ally's iPhone BLE"
-    device_id: "ally_phone"
-    state_topic: 'espresense/devices/ally_phone'
+    device_id: !secret ab_iphone_ble_id
+    state_topic: !secret ab_iphone_ble_topic
     timeout: 5
     away_timeout: 120
   - platform: mqtt_room
     name: "Kelly's iPhone BLE"
-    device_id: "kelly_phone"
-    state_topic: 'espresense/devices/kelly_phone'
+    device_id: !secret kb_iphone_ble_id
+    state_topic: !secret kb_iphone_ble_topic
     timeout: 5
     away_timeout: 120

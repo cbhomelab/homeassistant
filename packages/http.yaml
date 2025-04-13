@@ -1,4 +1,4 @@
 http:
   use_x_forwarded_for: true
   trusted_proxies:
-    - 10.20.0.4 ###(Nginx Proxy Manager LXC IP)###
+    - !secret nginx_ip ###(Nginx Proxy Manager LXC IP)###

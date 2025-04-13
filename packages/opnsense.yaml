@@ -1,4 +1,4 @@
 opnsense:
-  url: https://10.10.0.1/api
-  api_secret: LYYp5QCnsYFLHemyP1QpApAOrH8TMs6YHbZsquW1HHrNGdeEq1Q/8Gu2iXYvB6orcQZpHKeQXNTcS7zm
-  api_key: swQVXvzlipGgmUvVZIDHRCy8lEaWJS8BYktDVv5/4Y4Orh/2a7uy2l45oJsz3z8roMZNZobixrpRlvWc
+  url: !secret opnsense_url
+  api_secret: !secret opnsense_secret
+  api_key: !secret opnsense_key

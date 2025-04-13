@@ -1,5 +1,5 @@
 overseerr:
-  host: 10.40.0.99
-  port: 5055
-  api_key: MTcwODU3OTUzMzYzOWEzNDNkMDc2LTc4NDItNGNiOC1iMmI5LTA1NGRiYzIwZjViNw==
+  host: !secret overseerr_host
+  port: !secret overseerr_port
+  api_key: !secret overseerr_key
   scan_interval: 600
