@@ -1,0 +1,475 @@
+- id: '1645857212640'
+  name: Master Bedroom Nightlight
+  entities:
+    light.master_bedroom:
+      supported_color_modes:
+      - brightness
+      color_mode: brightness
+      brightness: 12
+      device_id: '35'
+      zone_id: '29'
+      icon: mdi:ceiling-fan-light
+      friendly_name: Master Bedroom Light
+      supported_features: 32
+      state: 'on'
+  icon: mdi:brightness-3
+  metadata: {}
+- id: '1645857480008'
+  name: Master Bedroom Dimmed
+  entities:
+    light.master_bedroom_ceiling_fan_light:
+      supported_color_modes:
+      - brightness
+      color_mode: brightness
+      brightness: 127
+      device_id: '35'
+      zone_id: '29'
+      friendly_name: Master Bedroom Ceiling Fan Light
+      supported_features: 32
+      state: 'on'
+  icon: mdi:brightness-6
+  metadata: {}
+- id: '1645857564553'
+  name: Master Bedroom Bright
+  entities:
+    light.master_bedroom_ceiling_fan_light:
+      supported_color_modes:
+      - brightness
+      color_mode: brightness
+      brightness: 255
+      device_id: '35'
+      zone_id: '29'
+      friendly_name: Master Bedroom Ceiling Fan Light
+      supported_features: 32
+      state: 'on'
+  icon: mdi:brightness-7
+  metadata: {}
+- id: '1656387409136'
+  name: Master Bedroom Lights Off
+  entities:
+    light.master_bedroom:
+      supported_color_modes:
+      - brightness
+      color_mode:
+      brightness:
+      device_id: '35'
+      zone_id: '29'
+      icon: mdi:ceiling-fan-light
+      friendly_name: Master Bedroom Light
+      supported_features: 32
+      state: 'off'
+  icon: mdi:lightbulb-group-off-outline
+  metadata: {}
+- id: '1656735137475'
+  name: Living Room Movie
+  entities:
+    light.living_room_right_lamp:
+      supported_color_modes:
+      - brightness
+      icon: mdi:floor-lamp
+      friendly_name: Right Lamp
+      supported_features: 32
+      color_mode: brightness
+      brightness: 3
+      state: 'on'
+    light.living_room_left_lamp:
+      supported_color_modes:
+      - brightness
+      icon: mdi:lamp
+      friendly_name: Left Lamp
+      supported_features: 32
+      color_mode: brightness
+      brightness: 3
+      state: 'on'
+    light.living_room_lamp_1:
+      supported_color_modes:
+      - brightness
+      icon: mdi:floor-lamp-dual
+      friendly_name: Lamp 1
+      supported_features: 32
+      color_mode: brightness
+      brightness: 3
+      state: 'on'
+    light.living_room_lamp_2:
+      supported_color_modes:
+      - brightness
+      icon: mdi:floor-lamp-dual
+      friendly_name: Lamp 2
+      supported_features: 32
+      color_mode: brightness
+      brightness: 3
+      state: 'on'
+    light.entryway_light:
+      supported_color_modes:
+      - brightness
+      color_mode: brightness
+      brightness: 104
+      device_id: '17'
+      zone_id: '12'
+      icon: mdi:globe-light
+      friendly_name: Entryway Light
+      supported_features: 32
+      state: 'on'
+    light.play_area_light:
+      supported_color_modes:
+      - brightness
+      device_id: '18'
+      zone_id: '13'
+      icon: mdi:chandelier
+      friendly_name: Play Area Light
+      supported_features: 32
+      state: 'off'
+  icon: mdi:filmstrip
+  metadata: {}
+- id: '1665207529169'
+  name: Living Room Bright
+  entities:
+    light.living_room_lights:
+      supported_color_modes:
+      - brightness
+      color_mode: brightness
+      brightness: 255
+      entity_id:
+      - light.living_room_right_lamp
+      - light.living_room_left_lamp
+      - light.living_room_lamp_1
+      - light.living_room_lamp_2
+      icon: mdi:lightbulb-group
+      friendly_name: Living Room Lights
+      supported_features: 32
+      state: 'on'
+  icon: mdi:brightness-7
+  metadata:
+    light.living_room_lights:
+      entity_only: true
+- id: '1665207560776'
+  name: Living Room Dimmed
+  entities:
+    light.living_room_lights:
+      supported_color_modes:
+      - brightness
+      color_mode: brightness
+      brightness: 128
+      entity_id:
+      - light.living_room_right_lamp
+      - light.living_room_left_lamp
+      - light.living_room_lamp_1
+      - light.living_room_lamp_2
+      icon: mdi:lightbulb-group
+      friendly_name: Living Room Lights
+      supported_features: 32
+      state: 'on'
+  icon: mdi:brightness-6
+  metadata:
+    light.living_room_lights:
+      entity_only: true
+- id: '1665207677804'
+  name: Living Room Lights Off
+  entities:
+    light.living_room_lights:
+      supported_color_modes:
+      - brightness
+      entity_id:
+      - light.living_room_right_lamp
+      - light.living_room_left_lamp
+      - light.living_room_lamp_1
+      - light.living_room_lamp_2
+      icon: mdi:lightbulb-group
+      friendly_name: Living Room Lights
+      supported_features: 32
+      state: 'off'
+  icon: mdi:brightness-5
+  metadata:
+    light.living_room_lights:
+      entity_only: true
+    light.play_area_light:
+      entity_only: true
+    light.entryway_light:
+      entity_only: true
+    light.front_hallway_light:
+      entity_only: true
+- id: '1665208504743'
+  name: Living Room All Lights On
+  entities:
+    light.play_area_light:
+      supported_color_modes:
+      - brightness
+      device_id: '18'
+      zone_id: '13'
+      icon: mdi:chandelier
+      friendly_name: Play Area Light
+      supported_features: 32
+      color_mode: brightness
+      brightness: 255
+      state: 'on'
+    light.living_room_lights:
+      supported_color_modes:
+      - brightness
+      color_mode: brightness
+      brightness: 255
+      entity_id:
+      - light.living_room_right_lamp
+      - light.living_room_left_lamp
+      - light.living_room_lamp_1
+      - light.living_room_lamp_2
+      icon: mdi:lightbulb-group
+      friendly_name: Living Room Lights
+      supported_features: 32
+      state: 'on'
+    light.entryway_light:
+      supported_color_modes:
+      - brightness
+      color_mode: brightness
+      brightness: 255
+      device_id: '17'
+      zone_id: '12'
+      icon: mdi:globe-light
+      friendly_name: Entryway Light
+      supported_features: 32
+      state: 'on'
+    light.front_hallway_light:
+      supported_color_modes:
+      - brightness
+      device_id: '5'
+      zone_id: '2'
+      icon: mdi:light-recessed
+      friendly_name: Front Hallway Light
+      supported_features: 32
+      color_mode: brightness
+      brightness: 255
+      state: 'on'
+  icon: mdi:brightness-1
+  metadata:
+    light.play_area_light:
+      entity_only: true
+    light.living_room_lights:
+      entity_only: true
+    light.entryway_light:
+      entity_only: true
+    light.front_hallway_light:
+      entity_only: true
+- id: '1670046465570'
+  name: Living Room All Lights Off
+  entities:
+    light.living_room_lights:
+      supported_color_modes:
+      - brightness
+      entity_id:
+      - light.living_room_right_lamp
+      - light.living_room_left_lamp
+      - light.living_room_lamp_1
+      - light.living_room_lamp_2
+      icon: mdi:lightbulb-group
+      friendly_name: Living Room Lights
+      supported_features: 32
+      state: 'off'
+    light.play_area_light:
+      supported_color_modes:
+      - brightness
+      device_id: '18'
+      zone_id: '13'
+      icon: mdi:chandelier
+      friendly_name: Play Area Light
+      supported_features: 32
+      state: 'off'
+    light.entryway_light:
+      supported_color_modes:
+      - brightness
+      device_id: '17'
+      zone_id: '12'
+      icon: mdi:globe-light
+      friendly_name: Entryway Light
+      supported_features: 32
+      state: 'off'
+    light.front_hallway_light:
+      supported_color_modes:
+      - brightness
+      device_id: '5'
+      zone_id: '2'
+      icon: mdi:light-recessed
+      friendly_name: Front Hallway Light
+      supported_features: 32
+      state: 'off'
+  icon: mdi:brightness-5
+  metadata:
+    light.living_room_lights:
+      entity_only: true
+    light.play_area_light:
+      entity_only: true
+    light.entryway_light:
+      entity_only: true
+    light.front_hallway_light:
+      entity_only: true
+- id: '1689010154958'
+  name: House Lights - Night
+  entities:
+    light.living_room_lights:
+      supported_color_modes:
+      - brightness
+      entity_id:
+      - light.living_room_lamp_1
+      - light.living_room_lamp_2
+      - light.living_room_left_lamp
+      icon: mdi:theater
+      friendly_name: Living Room Lights
+      supported_features: 32
+      state: 'off'
+    light.front_door:
+      supported_color_modes:
+      - onoff
+      color_mode: onoff
+      icon: mdi:outdoor-lamp
+      friendly_name: Front Door Light
+      supported_features: 0
+      state: 'on'
+    light.living_room_entry:
+      supported_color_modes:
+      - brightness
+      color_mode: brightness
+      brightness: 255
+      device_id: '17'
+      zone_id: '12'
+      icon: mdi:globe-light
+      friendly_name: Living Room Entry Light
+      supported_features: 32
+      state: 'on'
+    light.play_area:
+      supported_color_modes:
+      - brightness
+      device_id: '18'
+      zone_id: '13'
+      icon: mdi:ceiling-light
+      friendly_name: Play Area Light
+      supported_features: 32
+      state: 'off'
+    light.front_hallway:
+      supported_color_modes:
+      - brightness
+      device_id: '5'
+      zone_id: '2'
+      icon: mdi:light-recessed
+      friendly_name: Front Hallway Light
+      supported_features: 32
+      state: 'off'
+    light.dining_room:
+      supported_color_modes:
+      - brightness
+      device_id: '26'
+      zone_id: '21'
+      icon: mdi:ceiling-fan-light
+      friendly_name: Dining Room Light
+      supported_features: 32
+      state: 'off'
+    fan.dining_room:
+      preset_modes:
+      percentage: 0
+      percentage_step: 25
+      preset_mode:
+      device_id: '25'
+      zone_id: '20'
+      icon: mdi:ceiling-fan
+      friendly_name: Dining Room Fan
+      supported_features: 1
+      state: 'off'
+  icon: mdi:lightbulb-night
+  metadata:
+    light.living_room_lights:
+      entity_only: true
+    light.front_door:
+      entity_only: true
+    light.living_room_entry:
+      entity_only: true
+    light.play_area:
+      entity_only: true
+    light.front_hallway:
+      entity_only: true
+    light.dining_room:
+      entity_only: true
+    fan.dining_room:
+      entity_only: true
+- id: '1711041863756'
+  name: Violet Bedroom - Lights Full
+  entities:
+    light.violet_bedroom:
+      supported_color_modes:
+      - brightness
+      color_mode: brightness
+      brightness: 255
+      device_id: '32'
+      zone_id: '26'
+      icon: mdi:ceiling-fan-light
+      friendly_name: Violet Bedroom Light
+      supported_features: 32
+      state: 'on'
+  icon: mdi:brightness-7
+  metadata: {}
+- id: '1711041940073'
+  name: Violet Bedroom - Bedtime
+  entities:
+    light.violet_bedroom:
+      supported_color_modes:
+      - brightness
+      color_mode: brightness
+      brightness: 25
+      device_id: '32'
+      zone_id: '26'
+      icon: mdi:ceiling-fan-light
+      friendly_name: Violet Bedroom Light
+      supported_features: 32
+      state: 'on'
+    fan.violet_bedroom:
+      preset_modes:
+      percentage: 75
+      percentage_step: 25
+      preset_mode:
+      device_id: '31'
+      zone_id: '25'
+      icon: mdi:ceiling-fan
+      friendly_name: Violet Bedroom Fan
+      supported_features: 1
+      state: 'on'
+  icon: mdi:bed
+  metadata: {}
+- id: '1711042042686'
+  name: Violet Bedroom - Off
+  entities:
+    light.violet_bedroom:
+      supported_color_modes:
+      - brightness
+      color_mode:
+      brightness:
+      device_id: '32'
+      zone_id: '26'
+      icon: mdi:ceiling-fan-light
+      friendly_name: Violet Bedroom Light
+      supported_features: 32
+      state: 'off'
+    fan.violet_bedroom:
+      preset_modes:
+      percentage: 0
+      percentage_step: 25
+      preset_mode:
+      device_id: '31'
+      zone_id: '25'
+      icon: mdi:ceiling-fan
+      friendly_name: Violet Bedroom Fan
+      supported_features: 1
+      state: 'off'
+  icon: mdi:power-off
+  metadata: {}
+- id: '1711042075799'
+  name: Violet Bedroom - Lights Half
+  entities:
+    light.violet_bedroom:
+      supported_color_modes:
+      - brightness
+      color_mode: brightness
+      brightness: 127
+      device_id: '32'
+      zone_id: '26'
+      icon: mdi:ceiling-fan-light
+      friendly_name: Violet Bedroom Light
+      supported_features: 32
+      state: 'on'
+  icon: mdi:brightness-6
+  metadata: {}

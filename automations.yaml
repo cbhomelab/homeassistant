@@ -1,0 +1,5846 @@
+- id: '1644820927873'
+  alias: Master Closet Lights
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.master_closet_motion
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: light.master_closet
+    state: 'off'
+  - condition: state
+    entity_id: input_boolean.master_closet_light_automation
+    state: 'on'
+  action:
+  - service: light.turn_on
+    data: {}
+    target:
+      entity_id: light.master_closet
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - binary_sensor.master_closet_motion
+      to: 'off'
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.master_closet
+  mode: single
+- id: '1644876492529'
+  alias: Backyard - Gazebo Lights - Sunset
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunset
+    offset: '0'
+  condition: []
+  action:
+  - service: light.turn_on
+    data: {}
+    target:
+      entity_id: light.gazebo
+  - wait_for_trigger:
+    - platform: time
+      at: input_datetime.patio_lights_off_time
+    continue_on_timeout: false
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.gazebo
+  mode: single
+- id: '1644878197449'
+  alias: Backyard - Floodlights - Night
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.back_yard_all_occupancy
+    to: 'on'
+  - platform: state
+    entity_id:
+    - binary_sensor.office_exterior_door_open
+    to: 'on'
+  - platform: state
+    entity_id:
+    - binary_sensor.dining_room_sliding_door_open
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: sun.sun
+    state: below_horizon
+  - condition: state
+    entity_id: switch.backyard_string_lights
+    state: 'off'
+  - condition: state
+    entity_id: light.backyard_flood
+    state: 'off'
+  action:
+  - service: light.turn_on
+    data: {}
+    target:
+      entity_id: light.backyard_flood
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - binary_sensor.back_yard_all_occupancy
+      to: 'off'
+    timeout:
+      hours: 0
+      minutes: 30
+      seconds: 0
+      milliseconds: 0
+  - service: timer.start
+    data: {}
+    target:
+      entity_id: timer.backyard_floodlights
+  mode: single
+  variables:
+    timer: input_number.patio_light_timer
+- id: '1644879544768'
+  alias: Master Bathroom - Humidity High - Fan On
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.master_bathroom_humidity_high
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: input_boolean.master_bathroom_fan_automation
+    state: 'on'
+  action:
+  - service: fan.turn_on
+    data: {}
+    target:
+      entity_id: fan.master_bathroom
+  - service: timer.cancel
+    data: {}
+    target:
+      entity_id: timer.master_bathroom_fan
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - binary_sensor.master_bathroom_humidity_high
+      to: 'off'
+  - service: timer.start
+    data:
+      duration: 00:{{ int(states('input_number.master_bathroom_fan_timer')) }}
+    target:
+      entity_id: timer.master_bathroom_fan
+  mode: single
+  variables:
+    timer: input_number.guest_bathroom_fan_timer
+- id: '1644967500959'
+  alias: Notifications - Mail - Delivered
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.mailbox_open
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: input_boolean.mail_delivered
+    state: 'off'
+  action:
+  - if:
+    - condition: state
+      entity_id: input_boolean.mail_delivery_notify_ally
+      state: 'on'
+    then:
+    - service: notify.mobile_app_allys_phone
+      data:
+        message: The mail is here!
+        title: Mail Delivery
+    alias: Notify Ally
+  - if:
+    - condition: state
+      entity_id: input_boolean.mail_delivery_notify_christian
+      state: 'on'
+    then:
+    - service: notify.mobile_app_christian_s_phone
+      data:
+        message: The mail is here!
+        title: Mail Delivery
+    alias: Notify Christian
+  - if:
+    - condition: state
+      entity_id: input_boolean.mail_delivery_notify_kelly
+      state: 'on'
+    then:
+    - service: notify.mobile_app_kellys_phone
+      data:
+        message: The mail is here!
+        title: Mail Delivery
+    alias: Notify Kelly
+  - if:
+    - condition: state
+      entity_id: input_boolean.mail_delivery_notify_carley
+      state: 'on'
+    then:
+    - service: notify.mobile_app_carleys_phone
+      data:
+        message: The mail is here!
+        title: Mail Delivery
+    alias: Notify Carley
+  - service: input_boolean.turn_on
+    data: {}
+    target:
+      entity_id: input_boolean.mail_delivered
+  - service: persistent_notification.create
+    data:
+      title: The mail has been delivered
+      notification_id: home_feed_mail_delivered
+  mode: single
+- id: '1644967854786'
+  alias: Notification - Garage - Door Open
+  description: ''
+  trigger:
+  - type: opened
+    platform: device
+    device_id: 61240fcf3e19729b8ef1535bafafa1c6
+    entity_id: binary_sensor.garage_door_open
+    domain: binary_sensor
+    for:
+      hours: 2
+      minutes: 0
+      seconds: 0
+  condition: []
+  action:
+  - service: notify.notify_mobile_garage
+    data:
+      message: The Garage has been open for 2 hours
+      title: Garage Door Alert
+  mode: single
+- id: '1644968125375'
+  alias: Notification - Laundry - Washer
+  description: ''
+  trigger:
+  - type: turned_on
+    platform: device
+    device_id: b03aeee05faa5a2eedaceedf6f6ca89e
+    entity_id: binary_sensor.washer_wash_completed
+    domain: binary_sensor
+  condition: []
+  action:
+  - if:
+    - condition: state
+      entity_id: input_boolean.washer_finished_notify_ally
+      state: 'on'
+    then:
+    - service: notify.mobile_app_allys_phone
+      data:
+        message: Get em before they stink!
+        title: Washer Cycle Complete
+    alias: Notify Ally
+  - if:
+    - condition: state
+      entity_id: input_boolean.washer_finished_notify_christian
+      state: 'on'
+    then:
+    - service: notify.mobile_app_christian_s_phone
+      data:
+        message: Get em before they stink!
+        title: Washer Cycle Complete
+    alias: Notify Christian
+  - if:
+    - condition: state
+      entity_id: input_boolean.washer_finished_notify_kelly
+      state: 'on'
+    then:
+    - service: notify.mobile_app_kellys_phone
+      data:
+        message: Get em before they stink!
+        title: Washer Cycle Complete
+    alias: Notify Kelly
+  - if:
+    - condition: state
+      entity_id: input_boolean.washer_finished_notify_carley
+      state: 'on'
+    then:
+    - service: notify.mobile_app_carleys_phone
+      data:
+        message: Get em before they stink!
+        title: Washer Cycle Complete
+    alias: Notify Carley
+  mode: single
+- id: '1644968180526'
+  alias: Notification - Laundry - Dryer
+  description: ''
+  trigger:
+  - type: turned_on
+    platform: device
+    device_id: 7f5cc7909154d8ac051bfed81b40add1
+    entity_id: 34e154ed5fb2f86cd9e418a3ecb0b9bf
+    domain: binary_sensor
+  condition: []
+  action:
+  - if:
+    - condition: state
+      entity_id: input_boolean.dryer_finished_notify_ally
+      state: 'on'
+    then:
+    - service: notify.mobile_app_allys_phone
+      data:
+        message: Get em while they're hot
+        title: Dryer Cycle Complete
+    alias: Notify Ally
+  - if:
+    - condition: state
+      entity_id: input_boolean.dryer_finished_notify_christian
+      state: 'on'
+    then:
+    - service: notify.mobile_app_christian_s_phone
+      data:
+        message: Get em while they're hot
+        title: Dryer Cycle Complete
+    alias: Notify Christian
+  - if:
+    - condition: state
+      entity_id: input_boolean.dryer_finished_notify_kelly
+      state: 'on'
+    then:
+    - service: notify.mobile_app_kellys_phone
+      data:
+        message: Get em while they're hot
+        title: Dryer Cycle Complete
+    alias: Notify Kelly
+  - if:
+    - condition: state
+      entity_id: input_boolean.dryer_finished_notify_carley
+      state: 'on'
+    then:
+    - service: notify.mobile_app_carleys_phone
+      data:
+        message: Get em while they're hot
+        title: Dryer Cycle Complete
+    alias: Notify Carley
+  mode: single
+- id: '1644968465587'
+  alias: Office - Christian Sim Rig On - Fans On
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.christian_pc_on
+    to: 'on'
+  condition: []
+  action:
+  - type: turn_on
+    device_id: 8a6325e5d52bd3ef16d7765581808cd4
+    entity_id: switch.christian_sim_rig_fan
+    domain: switch
+  mode: single
+- id: '1644968502969'
+  alias: Office - Christian Sim Rig Off - Fans Off
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.christian_pc_on
+    to: 'off'
+  condition:
+  - condition: state
+    entity_id: automation.christian_sim_rig_based_automations
+    state: 'on'
+  action:
+  - type: turn_off
+    device_id: 8a6325e5d52bd3ef16d7765581808cd4
+    entity_id: switch.christian_sim_rig_fan
+    domain: switch
+  mode: single
+- id: '1644968676799'
+  alias: Notification - Power Loss
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.network_ups_status
+    to: On Battery Battery Discharging
+  - platform: state
+    entity_id: sensor.storage_ups_status
+    to: On Battery Battery Discharging
+  condition: []
+  action:
+  - service: notify.notify_mobile_all
+    data:
+      message: Check if a breaker tripped
+      title: Power loss detected!
+  - service: persistent_notification.create
+    data:
+      title: Power loss detected!
+      notification_id: home_feed_power_loss
+      message: Check if a breaker tripped
+  mode: single
+- id: '1645857781758'
+  alias: Master Bedroom Lights On
+  description: ''
+  trigger:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_ieee: 00:17:88:01:10:5e:c8:74
+      endpoint_id: 1
+      cluster_id: 6
+      command: 'on'
+  condition: []
+  action:
+  - scene: scene.master_bedroom_bright
+  mode: single
+- &id001
+  id: '1645858074812'
+  alias: Master Bedroom Lights Dimmed
+  description: ''
+  trigger:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_ieee: 00:17:88:01:10:5e:c8:74
+      endpoint_id: 1
+      cluster_id: 8
+      command: step
+      params:
+        step_mode: 0
+  condition: []
+  action:
+  - scene: scene.master_bedroom_dimmed
+  mode: single
+- *id001
+- id: '1645858542403'
+  alias: Master Bedroom Lights Off
+  description: ''
+  trigger:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_ieee: 00:17:88:01:10:5e:c8:74
+      endpoint_id: 1
+      cluster_id: 6
+      command: off_with_effect
+  condition: []
+  action:
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.master_bedroom_ceiling_fan_light
+  mode: single
+- id: '1645858921221'
+  alias: Master Bedroom Lights Nightlight
+  description: ''
+  trigger:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_ieee: 00:17:88:01:10:5e:c8:74
+      endpoint_id: 1
+      cluster_id: 8
+      command: step
+      params:
+        step_mode: 1
+  condition: []
+  action:
+  - scene: scene.master_bedroom_nightlight
+  mode: single
+- id: '1646006399677'
+  alias: Notifications - Mail - Reset
+  description: ''
+  trigger:
+  - platform: time
+    at: 00:00:00
+  - platform: state
+    entity_id:
+    - binary_sensor.mailbox_open
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: input_boolean.mail_delivered
+    state: 'on'
+  action:
+  - service: input_boolean.turn_off
+    data: {}
+    target:
+      entity_id: input_boolean.mail_delivered
+  mode: single
+- id: '1646343318833'
+  alias: Front Door - Sunset - Light On
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunset
+    offset: '0'
+  condition:
+  - condition: state
+    entity_id: light.front_door
+    state: 'off'
+  action:
+  - service: light.turn_on
+    data: {}
+    target:
+      entity_id: light.front_door
+  mode: single
+- id: '1646343545854'
+  alias: Front Door - Night Person Detected - Lights On
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.front_door_motion
+    to: 'on'
+    from: 'off'
+  - platform: numeric_state
+    entity_id: sensor.front_door_person_count
+    above: 0
+  condition:
+  - condition: state
+    entity_id: sun.sun
+    state: below_horizon
+  - condition: state
+    entity_id: light.front_door
+    state: 'off'
+  action:
+  - service: light.turn_on
+    data: {}
+    target:
+      entity_id: light.front_door
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - binary_sensor.front_door_motion
+      to: 'off'
+      for:
+        hours: 0
+        minutes: 5
+        seconds: 0
+  - wait_for_trigger:
+    - platform: numeric_state
+      entity_id: sensor.front_door_person_count
+      below: 1
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.front_door
+  mode: single
+- id: '1656823387718'
+  alias: Office - Christian PC - Button
+  description: Turn Christian's PC on remotely
+  trigger:
+  - platform: state
+    entity_id:
+    - input_button.christian_pc_power
+  condition:
+  - condition: state
+    entity_id: binary_sensor.christian_pc_on
+    state: 'off'
+  action:
+  - service: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.christian_sim_rig
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - service: switch.turn_on
+    target:
+      entity_id:
+      - switch.christian_sim_rig
+    data: {}
+  mode: single
+- id: '1661098405579'
+  alias: Garage - Turn Off Garage Door Relay
+  description: ''
+  trigger:
+  - platform: device
+    type: turned_on
+    device_id: 4b2cf57094552f81d0e7a50826c36599
+    entity_id: switch.garage_door_opener
+    domain: switch
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 15
+  condition: []
+  action:
+  - type: turn_off
+    device_id: 4b2cf57094552f81d0e7a50826c36599
+    entity_id: switch.garage_door_opener
+    domain: switch
+  mode: single
+- id: '1664245417641'
+  alias: Office - Sim Rigs On - Lights On
+  description: Turns on the lights when any sim-rig display turns on
+  trigger:
+  - platform: numeric_state
+    entity_id:
+    - sensor.christian_sim_rig_power_use
+    above: '10'
+  - platform: numeric_state
+    entity_id: sensor.kellys_sim_rig_monitor_power_draw
+    above: '10'
+  - platform: numeric_state
+    entity_id: sensor.dads_sim_rig_power_draw
+    above: '10'
+  condition: []
+  action:
+  - service: light.turn_on
+    data:
+      brightness_pct: 100
+    target:
+      entity_id: light.office
+  - service: fan.turn_on
+    data:
+      percentage: 75
+    target:
+      entity_id: fan.office
+  mode: single
+- id: '1670121039747'
+  alias: Backyard - Floodlights Sync
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - light.backyard_flood
+  condition: []
+  action:
+  - if:
+    - condition: state
+      entity_id: light.backyard_flood
+      state: 'on'
+    then:
+    - service: light.turn_on
+      data: {}
+      target:
+        entity_id:
+        - light.backyard_flood_plug
+    else:
+    - service: light.turn_off
+      data: {}
+      target:
+        entity_id:
+        - light.backyard_flood_plug
+  mode: single
+- id: '1670121765631'
+  alias: Driveway - Motion Detected at Night - Lights
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.front_door_person_count
+    above: 0
+  - platform: numeric_state
+    entity_id: sensor.front_yard_person_count
+    above: 0
+  condition:
+  - condition: state
+    entity_id: sun.sun
+    state: below_horizon
+  action:
+  - service: light.turn_on
+    data: {}
+    target:
+      entity_id: light.driveway
+  - wait_for_trigger:
+    - platform: numeric_state
+      entity_id: sensor.front_door_person_count
+      for:
+        hours: 0
+        minutes: 1
+        seconds: 0
+      below: 1
+    - platform: numeric_state
+      entity_id: sensor.front_yard_person_count
+      for:
+        hours: 0
+        minutes: 1
+        seconds: 0
+      below: 1
+    timeout:
+      hours: 0
+      minutes: 30
+      seconds: 0
+      milliseconds: 0
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.driveway
+  mode: single
+- id: '1670121944215'
+  alias: Side Yard - Floodlights - Night
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.garage_exterior_door_open
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: sun.sun
+    state: below_horizon
+  action:
+  - service: light.turn_on
+    data: {}
+    target:
+      entity_id: light.side_yard
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - binary_sensor.garage_exterior_door_open
+      from: 'on'
+      to: 'off'
+      for:
+        hours: 0
+        minutes: 5
+        seconds: 0
+    timeout:
+      hours: 0
+      minutes: 15
+      seconds: 0
+      milliseconds: 0
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.side_yard
+  mode: single
+- id: '1672627603647'
+  alias: Global - Doorbell Pressed - Chime
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.doorbell_button_pressed
+    to: 'on'
+    from: 'off'
+  condition: []
+  action:
+  - service: switch.turn_on
+    data: {}
+    target:
+      entity_id: switch.kitchen_chime
+  - service: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.doorbell_alert
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 0
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id: switch.kitchen_chime
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 3
+      milliseconds: 0
+  - service: switch.turn_on
+    data: {}
+    target:
+      entity_id: switch.kitchen_chime
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 0
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id: switch.kitchen_chime
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 20
+      milliseconds: 0
+  - service: input_boolean.turn_off
+    target:
+      entity_id:
+      - input_boolean.doorbell_alert
+    data: {}
+  mode: single
+- id: '1675561351638'
+  description: ''
+  trigger:
+  - platform: device
+    device_id: 4df61969164c53680c897eb4f1c33c0b
+    domain: lutron_caseta
+    type: press
+    subtype: raise
+  condition:
+  - condition: state
+    entity_id: light.living_room_lights
+    state: 'on'
+  action:
+  - service: light.turn_on
+    data:
+      brightness_step_pct: 5
+    target:
+      entity_id: light.living_room_lights
+  mode: single
+- id: '1675561923422'
+  alias: Living Room Pico Light Control
+  description: ''
+  use_blueprint:
+    path: cymone-smart/lutron_pico_5_light.yaml
+    input:
+      pico_1: 4df61969164c53680c897eb4f1c33c0b
+      entity:
+      - light.living_room_lights
+- id: '1677550710717'
+  alias: Office - Light Sync
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - light.office
+    from:
+  condition: []
+  action:
+  - if:
+    - condition: state
+      entity_id: light.office
+      state: 'on'
+    then:
+    - service: light.turn_on
+      target:
+        entity_id:
+        - light.office_rack_lamp
+        - light.office_room_lamp
+    else:
+    - service: light.turn_off
+      data: {}
+      target:
+        entity_id:
+        - light.office_rack_lamp
+        - light.office_room_lamp
+  mode: single
+- id: '1677551315316'
+  alias: Guest Bathroom - Light Sync
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - light.guest_bathroom
+  condition: []
+  action:
+  - if:
+    - condition: state
+      entity_id: light.guest_bathroom
+      state: 'on'
+    then:
+    - service: light.turn_on
+      data: {}
+      target:
+        entity_id: light.guest_bathroom_shower
+    else:
+    - service: light.turn_off
+      data: {}
+      target:
+        entity_id: light.guest_bathroom_shower
+  mode: single
+- id: '1677551436893'
+  alias: Guest Bathroom - Light Sync 2
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - light.guest_bathroom_shower
+  condition: []
+  action:
+  - if:
+    - condition: state
+      entity_id: light.guest_bathroom_shower
+      state: 'on'
+    then:
+    - service: light.turn_on
+      data: {}
+      target:
+        entity_id:
+        - light.guest_bathroom
+    else:
+    - service: light.turn_off
+      data: {}
+      target:
+        entity_id:
+        - light.guest_bathroom
+  mode: single
+- id: '1683431877986'
+  alias: Master Entryway Lights
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.master_entryway_motion
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: light.master_entry
+    state: 'off'
+  - condition: state
+    entity_id: input_boolean.master_entry_light_automation
+    state: 'on'
+  action:
+  - service: light.turn_on
+    target:
+      entity_id: light.master_entry
+    data_template:
+      brightness_pct: '{{ states(''sensor.master_entryway_light_brightness'') }}
+
+        '
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - binary_sensor.master_entryway_motion
+      to: 'off'
+  - service: light.turn_off
+    target:
+      entity_id: light.master_entry
+    data:
+      transition: 2
+  mode: single
+  variables:
+    timer: input_number.master_entryway_day_light_timer
+    brightness: input_number.master_entryway_day_brightness
+- id: '1684011366115'
+  alias: Violet Bedroom - Sleep Mode Lighting - Decrease
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - light.violet_bedroom
+    to: 'on'
+    alias: Light Turns On
+  - platform: state
+    entity_id:
+    - input_boolean.violet_bedroom_sleep_mode
+    to: 'on'
+    alias: Sleep Mode Enabled
+  - platform: state
+    entity_id:
+    - light.violet_bedroom
+    attribute: brightness
+    alias: Light Brightness Changes
+  condition:
+  - condition: state
+    entity_id: input_boolean.violet_bedroom_sleep_mode
+    state: 'on'
+    alias: Confirm Sleep Mode is On
+  - condition: state
+    entity_id: light.violet_bedroom
+    state: 'on'
+    alias: Confirm Light is On
+  - condition: template
+    value_template: "{% if (state_attr(\"light.violet_bedroom\", \"brightness\") *
+      0.39215686 | float | round(2) ) > 10 -%}\n  true\n{%- else -%}\n  false\n{%-
+      endif %}"
+    alias: Confirm Brightness is over 10%
+  action:
+  - repeat:
+      while:
+      - condition: template
+        value_template: "{% if (state_attr(\"light.violet_bedroom\", \"brightness\")
+          * 0.39215686 | float | round(2) ) > 10 -%}\n  true\n{%- else -%}\n  false\n{%-
+          endif %}"
+        alias: While Brightness is above 10%
+      - condition: state
+        entity_id: input_boolean.violet_bedroom_sleep_mode
+        state: 'on'
+        alias: Confirm Sleep Mode still Enabled
+      sequence:
+      - service: light.turn_on
+        data:
+          brightness_step_pct: -1
+        alias: Turn Light Down 1%
+        target:
+          entity_id: light.violet_bedroom
+      - delay:
+          hours: 0
+          minutes: 1
+          seconds: 0
+          milliseconds: 0
+        alias: Wait for 1 Minute
+    alias: Turn down lights 1% each minute until 10% brightness
+  mode: single
+- id: '1684012223860'
+  alias: Violet Bedroom - Fan Speed Limit
+  description: ''
+  trigger:
+  - platform: template
+    value_template: "{% if state_attr(\"fan.violet_bedroom\", \"percentage\") > 75
+      -%}\n  true\n{%- else -%}\n  false\n{%- endif %}"
+    alias: When Fan Speed is over 75%
+  condition:
+  - condition: state
+    entity_id: fan.violet_bedroom
+    state: 'on'
+    alias: Confirm Fan is On
+  - condition: state
+    entity_id: input_boolean.violet_bedroom_fan_speed_limit
+    state: 'on'
+  action:
+  - service: fan.set_percentage
+    data:
+      percentage: 75
+    alias: Set Fan back to 75%
+    target:
+      entity_id: fan.violet_bedroom
+  mode: single
+- id: '1684012751532'
+  alias: Violet Bedroom - Sleep Mode Toggle
+  description: On/Off Toggle for Violet Sleep Mode
+  trigger:
+  - device_id: e9663067cf101b02b24f8c101a517cd9
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button
+  condition: []
+  action:
+  - service: input_boolean.toggle
+    data: {}
+    target:
+      entity_id: input_boolean.violet_bedroom_sleep_mode
+  mode: single
+- id: '1684463097677'
+  alias: Master Bathroom - Motion Detected - Lights On
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.master_bathroom_motion
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: input_boolean.master_bathroom_light_automation
+    state: 'on'
+  action:
+  - if:
+    - condition: state
+      entity_id: light.master_bathroom
+      state: 'off'
+    then:
+    - service: light.turn_on
+      data_template:
+        brightness_pct: '{{ states(''sensor.master_bathroom_light_brightness'') }}
+
+          '
+      target:
+        entity_id: light.master_bathroom
+    else: []
+  - service: timer.cancel
+    data: {}
+    target:
+      entity_id: timer.master_bathroom_lights
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - binary_sensor.master_bathroom_motion
+      to: 'off'
+    timeout:
+      hours: 1
+      minutes: 0
+      seconds: 0
+      milliseconds: 0
+  - if:
+    - condition: state
+      entity_id: light.master_bathroom
+      state: 'on'
+    then:
+    - service: timer.start
+      data:
+        duration: 00:{{ int(states('input_number.master_bathroom_light_timer')) }}
+      target:
+        entity_id: timer.master_bathroom_lights
+    else: []
+  mode: single
+- id: '1684626470094'
+  alias: Global - Update Countdowns
+  description: ''
+  trigger:
+  - platform: time_pattern
+    seconds: '*'
+  condition: []
+  action:
+  - if:
+    - condition: state
+      entity_id: timer.master_entry_lights
+      state: active
+    then:
+    - service: homeassistant.update_entity
+      data: {}
+      target:
+        entity_id: sensor.master_entryway_light_timer
+  - if:
+    - condition: state
+      entity_id: timer.master_bathroom_lights
+      state: active
+    then:
+    - service: homeassistant.update_entity
+      data: {}
+      target:
+        entity_id: sensor.master_bathroom_light_timer
+  - if:
+    - condition: state
+      entity_id: timer.master_bathroom_fan
+      state: active
+    then:
+    - service: homeassistant.update_entity
+      data: {}
+      target:
+        entity_id: sensor.master_bathroom_fan_timer
+  - if:
+    - condition: state
+      entity_id: timer.guest_bathroom_lights
+      state: active
+    then:
+    - service: homeassistant.update_entity
+      data: {}
+      target:
+        entity_id: sensor.guest_bathroom_light_timer
+  - if:
+    - condition: state
+      entity_id: timer.guest_bathroom_fan
+      state: active
+    then:
+    - service: homeassistant.update_entity
+      data: {}
+      target:
+        entity_id: sensor.guest_bathroom_fan_timer
+  - if:
+    - condition: state
+      entity_id: timer.kitchen_lights
+      state: active
+    then:
+    - service: homeassistant.update_entity
+      data: {}
+      target:
+        entity_id: sensor.kitchen_light_timer
+  - if:
+    - condition: state
+      entity_id: timer.laundry_room_lights
+      state: active
+    then:
+    - service: homeassistant.update_entity
+      data: {}
+      target:
+        entity_id: sensor.laundry_room_light_timer
+  - if:
+    - condition: state
+      entity_id: timer.laundry_room_fan
+      state: active
+    then:
+    - service: homeassistant.update_entity
+      data: {}
+      target:
+        entity_id: sensor.laundry_room_fan_timer
+  - if:
+    - condition: state
+      entity_id: timer.garage_lights
+      state: active
+    then:
+    - service: homeassistant.update_entity
+      data: {}
+      target:
+        entity_id: sensor.garage_light_timer
+  - if:
+    - condition: state
+      entity_id: timer.patio_lights
+      state: active
+    then:
+    - service: homeassistant.update_entity
+      data: {}
+      target:
+        entity_id: sensor.patio_light_timer
+  - if:
+    - condition: state
+      state: 'on'
+      entity_id: sensor.washer
+    then:
+    - service: homeassistant.update_entity
+      data: {}
+      target:
+        entity_id: sensor.washer_time_display
+  - if:
+    - condition: state
+      state: 'on'
+      entity_id: sensor.dryer
+    then:
+    - service: homeassistant.update_entity
+      data: {}
+      target:
+        entity_id: sensor.dryer_time_display
+  - service: homeassistant.update_entity
+    data: {}
+    target:
+      entity_id:
+      - sensor.time_until_next_trash_pickup
+  - service: homeassistant.update_entity
+    data: {}
+    target:
+      entity_id:
+      - sensor.storage_ups_watts_used
+  - service: homeassistant.update_entity
+    data: {}
+    target:
+      entity_id:
+      - sensor.network_ups_watts_used
+  - service: homeassistant.update_entity
+    data: {}
+    target:
+      entity_id: sensor.front_door_state
+  mode: single
+- id: '1684630284334'
+  alias: Master Bathroom - Timer Finished - Lights Off
+  description: ''
+  trigger:
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.master_bathroom_lights
+  condition:
+  - condition: state
+    entity_id: input_boolean.master_bathroom_light_automation
+    state: 'on'
+  action:
+  - service: light.turn_off
+    data:
+      transition: 2
+    target:
+      entity_id: light.master_bathroom
+  mode: single
+- id: '1684630625908'
+  alias: Master Bathroom - Lights Off - Cancel Timer
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - light.master_bathroom
+    to: 'off'
+  condition:
+  - condition: state
+    entity_id: timer.master_bathroom_lights
+    state: active
+  - condition: state
+    entity_id: input_boolean.master_bathroom_light_automation
+    state: 'on'
+  action:
+  - service: timer.cancel
+    data: {}
+    target:
+      entity_id: timer.master_bathroom_lights
+  mode: single
+- id: '1684630797731'
+  alias: Master Bathroom - Timer Finished - Fan Off
+  description: ''
+  trigger:
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.master_bathroom_fan
+  condition:
+  - condition: state
+    entity_id: input_boolean.master_bathroom_fan_automation
+    state: 'on'
+  action:
+  - service: fan.turn_off
+    data: {}
+    target:
+      entity_id: fan.master_bathroom
+  mode: single
+  variables:
+    timer: input_number.guest_bathroom_fan_timer
+- id: '1684631059049'
+  alias: Master Bathroom - Fan On - Start Timer
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - fan.master_bathroom
+    to: 'on'
+  condition:
+  - condition: not
+    conditions:
+    - condition: numeric_state
+      entity_id: sensor.master_bathroom_humidity_rate_of_change
+      above: 0.6
+  - condition: state
+    entity_id: input_boolean.master_bathroom_fan_automation
+    state: 'on'
+  action:
+  - service: timer.start
+    data:
+      duration: 00:{{ int(states('input_number.master_bathroom_fan_timer')) }}
+    target:
+      entity_id: timer.master_bathroom_fan
+  mode: single
+- id: '1684631175496'
+  alias: Master Bathroom - Fan Off - Cancel Timer
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - fan.master_bathroom
+    to: 'off'
+  condition:
+  - condition: state
+    entity_id: timer.master_bathroom_fan
+    state: active
+  - condition: state
+    entity_id: input_boolean.master_bathroom_fan_automation
+    state: 'on'
+  action:
+  - service: timer.cancel
+    data: {}
+    target:
+      entity_id: timer.master_bathroom_fan
+  mode: single
+- id: '1684645802969'
+  alias: Laundry Room - Timer Finished - Lights Off
+  description: ''
+  trigger:
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.laundry_room_lights
+  condition:
+  - condition: state
+    entity_id: light.laundry_room
+    state: 'on'
+  - condition: state
+    entity_id: input_boolean.laundry_room_light_automation
+    state: 'on'
+  action:
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.laundry_room
+  mode: single
+- id: '1684645887848'
+  alias: Laundry Room - Lights Off - Cancel Timer
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - light.laundry_room
+    to: 'off'
+  condition:
+  - condition: state
+    entity_id: timer.laundry_room_lights
+    state: active
+  - condition: state
+    entity_id: input_boolean.laundry_room_light_automation
+    state: 'on'
+  action:
+  - service: timer.cancel
+    data: {}
+    target:
+      entity_id: timer.laundry_room_lights
+  mode: single
+- id: '1684646247376'
+  alias: Laundry Room - Fan Timer
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - fan.laundry_room
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: input_boolean.laundry_room_fan_automation
+    state: 'on'
+  action:
+  - service: timer.start
+    data:
+      duration: 00:{{ int(states('input_number.laundry_room_fan_timer')) }}
+    target:
+      entity_id: timer.laundry_room_fan
+  mode: single
+- id: '1684646322245'
+  alias: Laundry Room - Fan Off
+  description: ''
+  trigger:
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.laundry_room_fan
+  condition:
+  - condition: state
+    entity_id: input_boolean.laundry_room_fan_automation
+    state: 'on'
+  action:
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id: switch.laundry_room_fan
+  mode: single
+  variables:
+    timer: input_number.guest_bathroom_fan_timer
+- id: '1684646379798'
+  alias: Laundry Room - Fan Manual Off
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - fan.laundry_room
+    to: 'off'
+  condition:
+  - condition: state
+    entity_id: timer.laundry_room_fan
+    state: active
+  - condition: state
+    entity_id: input_boolean.laundry_room_fan_automation
+    state: 'on'
+  action:
+  - service: timer.cancel
+    data: {}
+    target:
+      entity_id: timer.laundry_room_fan
+  mode: single
+- id: '1684647678522'
+  alias: Kitchen - Timer Finished - Lights Off
+  description: ''
+  trigger:
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.kitchen_lights
+  condition:
+  - condition: state
+    entity_id: input_boolean.kitchen_light_automation
+    state: 'on'
+  action:
+  - service: light.turn_off
+    data:
+      transition: 2
+    target:
+      entity_id: light.kitchen
+  mode: single
+- id: '1684647726579'
+  alias: Kitchen - Lights Off - Cancel Timer
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - light.kitchen
+    to: 'off'
+  condition:
+  - condition: state
+    entity_id: timer.kitchen_lights
+    state: active
+  - condition: state
+    entity_id: input_boolean.kitchen_light_automation
+    state: 'on'
+  action:
+  - service: timer.cancel
+    data: {}
+    target:
+      entity_id:
+      - timer.kitchen_lights
+  mode: single
+- id: '1684814789385'
+  alias: Garage - Motion Detected - Lights On
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.garage_motion
+    to: 'on'
+  - type: opened
+    platform: device
+    device_id: 61240fcf3e19729b8ef1535bafafa1c6
+    entity_id: binary_sensor.garage_door_open
+    domain: binary_sensor
+  - type: opened
+    platform: device
+    device_id: 5f574c57b15b64af62de3b839a3db17f
+    entity_id: binary_sensor.garage_exterior_door_open
+    domain: binary_sensor
+  condition:
+  - condition: state
+    entity_id: input_boolean.garage_light_automation
+    state: 'on'
+  action:
+  - if:
+    - condition: state
+      entity_id: light.garage
+      state: 'off'
+    then:
+    - service: light.turn_on
+      data: {}
+      target:
+        entity_id: light.garage
+    - service: timer.cancel
+      target:
+        entity_id: timer.garage_lights
+      data: {}
+    else:
+    - service: timer.cancel
+      target:
+        entity_id: timer.garage_lights
+      data: {}
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - binary_sensor.garage_motion
+      to: 'off'
+  - service: timer.start
+    data:
+      duration: 00:{{ int(states('input_number.garage_light_timer')) }}
+    target:
+      entity_id: timer.garage_lights
+  mode: single
+- id: '1684814846579'
+  alias: Garage - Timer Finished - Lights Off
+  description: ''
+  trigger:
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.garage_lights
+  condition:
+  - condition: state
+    entity_id: input_boolean.garage_light_automation
+    state: 'on'
+  action:
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.garage
+  mode: single
+- id: '1684814910310'
+  alias: Garage - Lights Off - Cancel Timer
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - light.garage
+    to: 'off'
+  condition:
+  - condition: state
+    entity_id: timer.garage_lights
+    state: active
+  - condition: state
+    entity_id: input_boolean.garage_light_automation
+    state: 'on'
+  action:
+  - service: timer.cancel
+    data: {}
+    target:
+      entity_id:
+      - timer.garage_lights
+  mode: single
+- id: '1684873740277'
+  alias: Guest Bathroom - Motion Detected - Lights On
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.guest_bathroom_motion_sensor
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: input_boolean.guest_bathroom_light_automation
+    state: 'on'
+  action:
+  - if:
+    - condition: state
+      entity_id: light.guest_bathroom
+      state: 'off'
+    then:
+    - service: light.turn_on
+      data_template:
+        brightness_pct: '{{ states(''sensor.guest_bathroom_light_brightness'') }}
+
+          '
+      target:
+        entity_id: light.guest_bathroom
+    - service: timer.cancel
+      target:
+        entity_id: timer.guest_bathroom_lights
+      data: {}
+    else:
+    - service: timer.cancel
+      target:
+        entity_id: timer.guest_bathroom_lights
+      data: {}
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - binary_sensor.guest_bathroom_motion_sensor
+      to: 'off'
+  - if:
+    - condition: state
+      entity_id: light.guest_bathroom
+      state: 'on'
+    then:
+    - service: timer.start
+      data:
+        duration: 00:{{ int(states('input_number.guest_bathroom_light_timer')) }}
+      target:
+        entity_id: timer.guest_bathroom_lights
+  mode: single
+- id: '1684873816228'
+  alias: Guest Bathroom - Lights Off - Cancel Timer
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - light.guest_bathroom_lights
+    to: 'off'
+  condition:
+  - condition: state
+    entity_id: timer.guest_bathroom_lights
+    state: active
+  - condition: state
+    entity_id: input_boolean.guest_bathroom_light_automation
+    state: 'on'
+  action:
+  - service: timer.cancel
+    data: {}
+    target:
+      entity_id: timer.guest_bathroom_lights
+  mode: single
+- id: '1684873858351'
+  alias: Guest Bathroom - Timer Finished - Lights Off
+  description: ''
+  trigger:
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.guest_bathroom_lights
+  condition:
+  - condition: state
+    entity_id: light.guest_bathroom
+    state: 'on'
+  - condition: state
+    entity_id: input_boolean.guest_bathroom_light_automation
+    state: 'on'
+  action:
+  - service: light.turn_off
+    data:
+      transition: 2
+    target:
+      entity_id: light.guest_bathroom
+  mode: single
+- id: '1684874611886'
+  alias: Guest Bathroom - Fan On Timer
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - fan.guest_bathroom
+    to: 'on'
+  condition:
+  - condition: not
+    conditions:
+    - condition: numeric_state
+      entity_id: sensor.guest_bathroom_humidity_rate_of_change
+      above: 0.6
+  - condition: state
+    entity_id: input_boolean.guest_bathroom_fan_automation
+    state: 'on'
+  action:
+  - service: timer.start
+    data:
+      duration: 00:{{ int(states('input_number.guest_bathroom_fan_timer')) }}
+    target:
+      entity_id: timer.guest_bathroom_fan
+  mode: single
+- id: '1684874644729'
+  alias: Guest Bathroom - Fan On Humidity
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id:
+    - sensor.guest_bathroom_humidity
+    above: 0.9
+  condition:
+  - condition: state
+    entity_id: input_boolean.guest_bathroom_fan_automation
+    state: 'on'
+  action:
+  - service: switch.turn_on
+    data: {}
+    target:
+      entity_id: switch.guest_bathroom_fan
+  - service: timer.cancel
+    data: {}
+    target:
+      entity_id: timer.guest_bathroom_fan
+  - wait_for_trigger:
+    - platform: numeric_state
+      entity_id: sensor.guest_bathroom_humidity_rate_of_change
+      below: -0.04
+  - service: timer.start
+    data:
+      duration: 00:{{ int(states('input_number.guest_bathroom_fan_timer')) }}
+    target:
+      entity_id: timer.guest_bathroom_fan
+  mode: single
+  variables:
+    timer: input_number.guest_bathroom_fan_timer
+- id: '1684874684005'
+  alias: Guest Bathroom - Fan Off Manual
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - fan.guest_bathroom
+    to: 'off'
+  condition:
+  - condition: state
+    entity_id: timer.guest_bathroom_fan
+    state: active
+  - condition: state
+    entity_id: input_boolean.guest_bathroom_fan_automation
+    state: 'on'
+  action:
+  - service: timer.cancel
+    data: {}
+    target:
+      entity_id: timer.guest_bathroom_fan
+  mode: single
+- id: '1684874745204'
+  alias: Guest Bathroom - Fan Off
+  description: ''
+  trigger:
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.guest_bathroom_fan
+  condition:
+  - condition: state
+    entity_id: input_boolean.guest_bathroom_fan_automation
+    state: 'on'
+  action:
+  - service: fan.turn_off
+    data: {}
+    target:
+      entity_id: fan.guest_bathroom
+  mode: single
+  variables:
+    timer: input_number.guest_bathroom_fan_timer
+- id: '1685389911455'
+  alias: Laundry Room - Motion Detected - Lights On
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.laundry_room_motion
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: input_boolean.laundry_room_light_automation
+    state: 'on'
+  action:
+  - if:
+    - condition: state
+      entity_id: light.laundry_room
+      state: 'off'
+    then:
+    - service: timer.cancel
+      target:
+        entity_id: timer.laundry_room_lights
+      data: {}
+    - service: light.turn_on
+      data: {}
+      target:
+        entity_id: light.laundry_room
+    else:
+    - service: timer.cancel
+      target:
+        entity_id: timer.laundry_room_lights
+      data: {}
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - binary_sensor.laundry_room_motion
+      to: 'off'
+  - if:
+    - condition: state
+      entity_id: light.laundry_room
+      state: 'on'
+    then:
+    - service: timer.start
+      data:
+        duration: 00:{{ int(states('input_number.laundry_room_light_timer')) }}
+      target:
+        entity_id: timer.laundry_room_lights
+  mode: single
+- id: '1685390135650'
+  alias: Kitchen - Motion Detected - Lights On
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.kitchen_motion_sensor_1
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: input_boolean.kitchen_light_automation
+    state: 'on'
+  action:
+  - if:
+    - condition: state
+      entity_id: light.kitchen
+      state: 'off'
+    then:
+    - service: light.turn_on
+      data_template:
+        brightness_pct: '{{ states(''sensor.kitchen_light_brightness'') }}
+
+          '
+      target:
+        entity_id: light.kitchen
+    - service: timer.cancel
+      data: {}
+      target:
+        entity_id: timer.kitchen_lights
+    else:
+    - service: timer.cancel
+      data: {}
+      target:
+        entity_id: timer.kitchen_lights
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - binary_sensor.kitchen_motion_sensor_1
+      to: 'off'
+  - if:
+    - condition: state
+      entity_id: light.kitchen
+      state: 'on'
+    then:
+    - service: timer.start
+      data:
+        duration: 00:{{ int(states('input_number.kitchen_light_timer')) }}
+      target:
+        entity_id: timer.kitchen_lights
+    else: []
+  mode: single
+- id: '1687756978180'
+  alias: Backyard - Floodlights - Timer Finished
+  description: ''
+  trigger:
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.backyard_floodlights
+  condition:
+  - condition: state
+    entity_id: light.backyard_flood
+    state: 'on'
+  action:
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.backyard_flood
+  mode: single
+- id: '1687814915498'
+  alias: Front Door - At Time Variable - Light Off
+  description: ''
+  trigger:
+  - platform: time
+    at: input_datetime.front_door_light_off_time
+  condition:
+  - condition: state
+    entity_id: light.front_door
+    state: 'on'
+  action:
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.front_door
+  mode: single
+- id: '1688012311380'
+  alias: Notification - Sensor Low Battery
+  description: ''
+  use_blueprint:
+    path: sbyx/low-battery-level-detection-notification-for-all-battery-sensors.yaml
+    input:
+      exclude:
+        entity_id:
+        - sensor.allys_phone_battery_level
+        - sensor.carleys_phone_battery_level
+        - sensor.christian_s_phone_battery_level
+        - sensor.kellys_phone_battery_level
+        - sensor.ipad_internal_battery_level
+        - sensor.cb_ipad_battery_level
+        - sensor.cb_macbook_9_internal_battery_level
+        - sensor.front_door_touchpanel_battery
+        - sensor.office_touchpanel_battery
+        - sensor.kitchen_chime_battery_level
+        - binary_sensor.kitchen_chime_low_battery_level
+        - binary_sensor.lock_power_management_replace_battery_now_frontdoor
+      actions:
+      - service: notify.mobile_app_christian_s_phone
+        data:
+          message: '{{sensors | replace(", ", "\n")}}.'
+          title: Low Battery Warning
+      - service: notify.persistent_notification
+        data:
+          message: '{{sensors | replace(", ", "\n")}}.'
+          title: Low Battery Warning
+- id: '1688106180438'
+  alias: Global - Enable Trash Notification
+  description: ''
+  trigger:
+  - platform: time
+    at: sensor.trash_dashboard_notification_time
+  condition: []
+  action:
+  - service: input_boolean.turn_on
+    data: {}
+    target:
+      entity_id: input_boolean.trash_day_tomorrow
+  mode: single
+- id: '1688107544452'
+  alias: Notification - Trash Day
+  description: ''
+  trigger:
+  - platform: time
+    at: sensor.trash_phone_notification_time
+  condition: []
+  action:
+  - if:
+    - condition: state
+      entity_id: input_boolean.trash_day_notify_ally
+      state: 'on'
+    then:
+    - service: notify.mobile_app_allys_phone
+      data:
+        message: Make sure the cans are out
+        title: Trash day is tomorrow!
+    alias: Notify Ally
+  - if:
+    - condition: state
+      entity_id: input_boolean.trash_day_notify_christian
+      state: 'on'
+    then:
+    - service: notify.mobile_app_christian_s_phone
+      data:
+        message: Make sure the cans are out
+        title: Trash day is tomorrow!
+    alias: Notify Christian
+  - if:
+    - condition: state
+      entity_id: input_boolean.trash_day_notify_kelly
+      state: 'on'
+    then:
+    - service: notify.mobile_app_kellys_phone
+      data:
+        message: Make sure the cans are out
+        title: Trash day is tomorrow!
+    alias: Notify Kelly
+  - if:
+    - condition: state
+      entity_id: input_boolean.trash_day_notify_carley
+      state: 'on'
+    then:
+    - service: notify.mobile_app_carleys_phone
+      data:
+        message: Make sure the cans are out
+        title: Trash day is tomorrow!
+    alias: Notify Carley
+  mode: single
+- id: '1688107740119'
+  alias: Notification - Trash - Reset Boolean
+  description: ''
+  trigger:
+  - platform: time
+    at: sensor.trash
+  condition: []
+  action:
+  - service: input_boolean.turn_off
+    data: {}
+    target:
+      entity_id: input_boolean.trash_day_tomorrow
+  mode: single
+- id: '1689221475963'
+  alias: Kitchen - Light Sync
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - light.kitchen
+  condition: []
+  action:
+  - if:
+    - condition: state
+      entity_id: light.kitchen
+      state: 'on'
+    then:
+    - service: light.turn_on
+      data_template:
+        brightness: '{{ state_attr(''light.kitchen'', ''brightness'') }}'
+      target:
+        entity_id:
+        - light.kitchen_sink
+        - light.countertop
+    else:
+    - service: light.turn_off
+      target:
+        entity_id:
+        - light.kitchen_sink
+        - light.countertop
+      data: {}
+  mode: single
+- id: '1691877665527'
+  alias: Backyard - Gazebo - Light Sync
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - light.gazebo
+  condition: []
+  action:
+  - if:
+    - condition: state
+      entity_id: light.gazebo
+      state: 'on'
+    then:
+    - service: light.turn_on
+      data: {}
+      target:
+        entity_id: light.gazebo_light_plug
+    else:
+    - service: light.turn_off
+      data: {}
+      target:
+        entity_id: light.gazebo_light_plug
+  mode: single
+- id: '1700977307844'
+  alias: Set Someone Home Boolean
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - person.christian_bishop
+    from:
+    to:
+  - platform: state
+    entity_id:
+    - person.ally_bishop
+    from:
+    to:
+  - platform: state
+    entity_id:
+    - person.kelly_bishop
+    from:
+    to:
+  - platform: state
+    entity_id:
+    - person.carley_furto
+    from:
+    to:
+  condition: []
+  action:
+  - if:
+    - condition: not
+      conditions:
+      - condition: zone
+        entity_id: person.christian_bishop
+        zone: zone.home
+      - condition: zone
+        entity_id: person.ally_bishop
+        zone: zone.home
+      - condition: zone
+        entity_id: person.kelly_bishop
+        zone: zone.home
+      - condition: zone
+        entity_id: person.carley_furto
+        zone: zone.home
+      alias: If everyone is not home
+    then:
+    - service: input_boolean.turn_off
+      data: {}
+      target:
+        entity_id: input_boolean.someone_home
+    else:
+    - service: input_boolean.turn_on
+      data: {}
+      target:
+        entity_id: input_boolean.someone_home
+  mode: single
+- id: '1700978761175'
+  alias: Toggle Someone Away Boolean
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - person.christian_bishop
+    from:
+    to:
+  - platform: state
+    entity_id:
+    - person.ally_bishop
+    from:
+    to:
+  - platform: state
+    entity_id:
+    - person.kelly_bishop
+    from:
+    to:
+  - platform: state
+    entity_id:
+    - person.carley_furto
+    from:
+    to:
+  condition: []
+  action:
+  - if:
+    - condition: or
+      conditions:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: person.christian_bishop
+          state: home
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: person.ally_bishop
+          state: home
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: person.kelly_bishop
+          state: home
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: person.carley_furto
+          state: home
+    then:
+    - service: input_boolean.turn_on
+      data: {}
+      target:
+        entity_id: input_boolean.someone_away
+    else:
+    - service: input_boolean.turn_off
+      data: {}
+      target:
+        entity_id: input_boolean.someone_away
+  mode: single
+- id: '1702959551375'
+  alias: Xmas - Sunset - Lights On
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunset
+    offset: 0
+  condition:
+  - condition: state
+    entity_id: input_boolean.christmas_viz
+    state: 'on'
+  action:
+  - service: light.turn_on
+    data: {}
+    target:
+      entity_id:
+      - light.christmas_lights
+      - light.christmas_tree
+  mode: single
+- id: '1702959715719'
+  alias: Xmas - Lights Off
+  description: ''
+  trigger:
+  - platform: time
+    at: input_datetime.christmas_light_off_time
+  condition:
+  - condition: state
+    entity_id: input_boolean.christmas_viz
+    state: 'on'
+  action:
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id:
+      - light.christmas_lights
+      - light.christmas_tree
+  mode: single
+- id: '1702959816672'
+  alias: Xmas - Enable Viz and Automations
+  description: ''
+  trigger:
+  - platform: time
+    at: input_datetime.christmas_time_start
+  condition: []
+  action:
+  - service: input_boolean.turn_on
+    data: {}
+    target:
+      entity_id: input_boolean.christmas_viz
+  mode: single
+- id: '1702959864674'
+  alias: Xmas - Disable Viz and Automations
+  description: ''
+  trigger:
+  - platform: time
+    at: input_datetime.christmas_time_stop
+  condition: []
+  action:
+  - service: input_boolean.turn_off
+    data: {}
+    target:
+      entity_id: input_boolean.christmas_viz
+  mode: single
+- id: '1710388241380'
+  alias: Master Bedroom TV - Toggle
+  description: ''
+  trigger: []
+  condition: []
+  action:
+  - if:
+    - condition: device
+      type: is_off
+      device_id: bc7126e259b0765e144923dba8a6677c
+      entity_id: 34a21b486daa09a2e51de01d57f2439d
+      domain: remote
+    then:
+    - type: turn_on
+      device_id: bc7126e259b0765e144923dba8a6677c
+      entity_id: 34a21b486daa09a2e51de01d57f2439d
+      domain: remote
+    - service: remote.send_command
+      metadata: {}
+      data:
+        num_repeats: 1
+        delay_secs: 0.4
+        hold_secs: 0
+        command: wakeup
+      target:
+        entity_id: remote.master_bedroom
+    - wait_template: '{{ (states("media_player.master_bedroom_tv") == ''on'') }}'
+      continue_on_timeout: true
+    - service: media_player.select_source
+      metadata: {}
+      data:
+        source: Master Bedroom
+      target:
+        entity_id: media_player.master_bedroom_tv
+    else:
+    - service: remote.send_command
+      metadata: {}
+      data:
+        num_repeats: 1
+        delay_secs: 0.4
+        hold_secs: 3
+        command: suspend
+      target:
+        entity_id: remote.master_bedroom
+    - type: turn_off
+      device_id: bc7126e259b0765e144923dba8a6677c
+      entity_id: 34a21b486daa09a2e51de01d57f2439d
+      domain: remote
+  mode: single
+- id: '1711042539422'
+  alias: Violet Bedtime Scene - Turn Sleep Mode On
+  description: On/Off Toggle for Violet Sleep Mode
+  trigger:
+  - platform: state
+    entity_id:
+    - scene.violet_bedroom_bedtime
+  condition: []
+  action:
+  - service: input_boolean.turn_on
+    target:
+      entity_id:
+      - input_boolean.violet_bedroom_sleep_mode
+    data: {}
+  mode: single
+- id: '1711042600963'
+  alias: Violet Sleep Mode - Turn off at 7AM
+  description: On/Off Toggle for Violet Sleep Mode
+  trigger:
+  - platform: time
+    at: 07:00:00
+  condition: []
+  action:
+  - service: input_boolean.turn_off
+    target:
+      entity_id:
+      - input_boolean.violet_bedroom_sleep_mode
+    data: {}
+  mode: single
+- id: '1717728864462'
+  alias: Christian Presence
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.christian_s_iphone_ble
+    to:
+  - platform: state
+    entity_id:
+    - input_boolean.christian_presence_override
+    to: 'off'
+  condition:
+  - condition: state
+    entity_id: input_boolean.christian_presence_override
+    state: 'off'
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_iphone_ble
+        state: living_room
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.christian_presence
+        data:
+          option: Living Room
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_iphone_ble
+        state: kitchen
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.christian_presence
+        data:
+          option: Kitchen
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_iphone_ble
+        state: master_bedroom
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.christian_presence
+        data:
+          option: Master Bedroom
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_iphone_ble
+        state: office
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.christian_presence
+        data:
+          option: Office
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_iphone_ble
+        state: garage
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.christian_presence
+        data:
+          option: Garage
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_iphone_ble
+        state: violet_s_bedroom
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.christian_presence
+        data:
+          option: Violet's Bedroom
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_iphone_ble
+        state: kelly_carley_bedroom
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.christian_presence
+        data:
+          option: Kelly & Carley's Bedroom
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_iphone_ble
+        state: backyard
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.christian_presence
+        data:
+          option: Backyard
+  mode: single
+- id: '1721684095245'
+  alias: Office TV - Input Select
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_select.office_tv
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.office_tv
+        state: Computer
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.office_tv
+          state: Computer
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Computer
+        target:
+          entity_id: media_player.office_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.office_tv
+        state: F1 TV
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.office_tv
+          state: F1 TV
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: F1 TV
+        target:
+          entity_id: media_player.office_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.office_tv
+        state: Plex
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.office_tv
+          state: Plex - Free Movies & TV
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Plex - Free Movies & TV
+        target:
+          entity_id: media_player.office_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.office_tv
+        state: NBC Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.office_tv
+          state: NBC Sports
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: NBC Sports
+        target:
+          entity_id: media_player.office_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.office_tv
+        state: FOX Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.office_tv
+          state: FOX Sports
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: FOX Sports
+        target:
+          entity_id: media_player.office_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.office_tv
+        state: CBS Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.office_tv
+          state: CBS Sports Stream & Watch Live
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: CBS Sports Stream & Watch Live
+        target:
+          entity_id: media_player.office_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.office_tv
+        state: YouTube
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.office_tv
+          state: YouTube
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: YouTube
+        target:
+          entity_id: media_player.office_tv
+  mode: single
+- id: '1721686700526'
+  alias: Bedroom 3 TV - Input Feedback
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.bedroom_3_tv_active_app
+  - platform: state
+    entity_id:
+    - media_player.bedroom_3_tv
+    from: 'off'
+    to:
+  - platform: state
+    entity_id:
+    - media_player.bedroom_3_tv
+    from: standby
+    to:
+  - platform: state
+    entity_id:
+    - media_player.bedroom_3_tv
+    from: unknown
+    to:
+  - platform: state
+    entity_id:
+    - media_player.bedroom_3_tv
+    from: unavailable
+    to:
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.bedroom_3_tv_active_app
+        state: Nintendo Switch
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.bedroom_3_tv
+          state: Nintendo Switch
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.bedroom_3_tv
+        data:
+          option: Nintendo Switch
+    - conditions:
+      - condition: state
+        entity_id: sensor.bedroom_3_tv_active_app
+        state: Plex - Free Movies & TV
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.bedroom_3_tv
+          state: Plex
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.bedroom_3_tv
+        data:
+          option: Plex
+    - conditions:
+      - condition: state
+        entity_id: sensor.bedroom_3_tv_active_app
+        state: YouTube
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.bedroom_3_tv
+          state: YouTube
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.bedroom_3_tv
+        data:
+          option: YouTube
+    - conditions:
+      - condition: state
+        entity_id: sensor.bedroom_3_tv_active_app
+        state: F1 TV
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.bedroom_3_tv
+          state: F1 TV
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.bedroom_3_tv
+        data:
+          option: F1 TV
+    - conditions:
+      - condition: state
+        entity_id: sensor.bedroom_3_tv_active_app
+        state: Hulu
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.bedroom_3_tv
+          state: Hulu
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.bedroom_3_tv
+        data:
+          option: Hulu
+    - conditions:
+      - condition: state
+        entity_id: sensor.bedroom_3_tv_active_app
+        state: Prime Video
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.bedroom_3_tv
+          state: Prime Video
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.bedroom_3_tv
+        data:
+          option: Prime Video
+    - conditions:
+      - condition: state
+        entity_id: sensor.bedroom_3_tv_active_app
+        state: Disney Plus
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.bedroom_3_tv
+          state: Disney+
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.bedroom_3_tv
+        data:
+          option: Disney+
+    - conditions:
+      - condition: state
+        entity_id: sensor.bedroom_3_tv_active_app
+        state: Netflix
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.bedroom_3_tv
+          state: Netflix
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.bedroom_3_tv
+        data:
+          option: Netflix
+    - conditions:
+      - condition: state
+        entity_id: sensor.bedroom_3_tv_active_app
+        state: Home
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.bedroom_3_tv
+          state: Home
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.bedroom_3_tv
+        data:
+          option: Home
+    - conditions:
+      - condition: state
+        entity_id: media_player.bedroom_3_tv
+        state: 'off'
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.bedroom_3_tv
+        data:
+          option: None
+    - conditions:
+      - condition: state
+        entity_id: media_player.bedroom_3_tv
+        state: standby
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.bedroom_3_tv
+        data:
+          option: None
+    - conditions:
+      - condition: state
+        entity_id: media_player.bedroom_3_tv
+        state: idle
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.bedroom_3_tv
+        data:
+          option: None
+    default: []
+  mode: single
+- id: '1721769635294'
+  alias: Office TV - Input Feedback
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.office_tv_active_app
+  - platform: state
+    entity_id:
+    - media_player.office_tv
+    from: 'off'
+    to:
+  - platform: state
+    entity_id:
+    - media_player.office_tv
+    from: standby
+    to:
+  - platform: state
+    entity_id:
+    - media_player.office_tv
+    from: unknown
+    to:
+  - platform: state
+    entity_id:
+    - media_player.office_tv
+    from: unavailable
+    to:
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.office_tv_active_app
+        state: Computer
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.office_tv
+          state: Computer
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.office_tv
+        data:
+          option: Computer
+    - conditions:
+      - condition: state
+        entity_id: sensor.office_tv_active_app
+        state: Plex - Free Movies & TV
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.office_tv
+          state: Plex
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.office_tv
+        data:
+          option: Plex
+    - conditions:
+      - condition: state
+        entity_id: sensor.office_tv_active_app
+        state: YouTube
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.office_tv
+          state: YouTube
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.office_tv
+        data:
+          option: YouTube
+    - conditions:
+      - condition: state
+        entity_id: sensor.office_tv_active_app
+        state: F1 TV
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.office_tv
+          state: F1 TV
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.office_tv
+        data:
+          option: F1 TV
+    - conditions:
+      - condition: state
+        entity_id: sensor.office_tv_active_app
+        state: NBC Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.office_tv
+          state: NBC Sports
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.office_tv
+        data:
+          option: NBC Sports
+    - conditions:
+      - condition: state
+        entity_id: sensor.office_tv_active_app
+        state: FOX Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.office_tv
+          state: FOX Sports
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.office_tv
+        data:
+          option: FOX Sports
+    - conditions:
+      - condition: state
+        entity_id: sensor.office_tv_active_app
+        state: CBS Sports Stream & Watch Live
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.office_tv
+          state: CBS Sports
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.office_tv
+        data:
+          option: CBS Sports
+    - conditions:
+      - condition: state
+        entity_id: sensor.office_tv_active_app
+        state: Home
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.office_tv
+          state: Home
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.office_tv
+        data:
+          option: Home
+    - conditions:
+      - condition: state
+        entity_id: media_player.office_tv
+        state: 'off'
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.office_tv
+        data:
+          option: None
+    - conditions:
+      - condition: state
+        entity_id: media_player.office_tv
+        state: standby
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.office_tv
+        data:
+          option: None
+    default: []
+  mode: single
+- id: '1721769745271'
+  alias: Bedroom 3 TV - Input Select
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_select.bedroom_3_tv
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.bedroom_3_tv
+        state: Computer
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.bedroom_3_tv
+          state: Computer
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Computer
+        target:
+          entity_id: media_player.bedroom_3_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.bedroom_3_tv
+        state: F1 TV
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.bedroom_3_tv
+          state: F1 TV
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: F1 TV
+        target:
+          entity_id: media_player.bedroom_3_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.bedroom_3_tv
+        state: Plex
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.bedroom_3_tv
+          state: Plex - Free Movies & TV
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Plex - Free Movies & TV
+        target:
+          entity_id: media_player.bedroom_3_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.bedroom_3_tv
+        state: Hulu
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.bedroom_3_tv
+          state: Hulu
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Hulu
+        target:
+          entity_id: media_player.bedroom_3_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.bedroom_3_tv
+        state: Disney+
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.bedroom_3_tv
+          state: Disney Plus
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Disney Plus
+        target:
+          entity_id: media_player.bedroom_3_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.bedroom_3_tv
+        state: Prime Video
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.bedroom_3_tv
+          state: Prime Video
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Prime Video
+        target:
+          entity_id: media_player.bedroom_3_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.bedroom_3_tv
+        state: YouTube
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.bedroom_3_tv
+          state: YouTube
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: YouTube
+        target:
+          entity_id: media_player.bedroom_3_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.bedroom_3_tv
+        state: Netflix
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.bedroom_3_tv
+          state: Netflix
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Netflix
+        target:
+          entity_id: media_player.bedroom_3_tv
+  mode: single
+- id: '1721770192486'
+  alias: Garage TV - Input Select
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_select.garage_tv
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.garage_tv
+        state: Computer
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.garage_tv
+          state: Computer
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Computer
+        target:
+          entity_id: media_player.garage_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.garage_tv
+        state: F1 TV
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.garage_tv
+          state: F1 TV
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: F1 TV
+        target:
+          entity_id: media_player.garage_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.garage_tv
+        state: Plex
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.garage_tv
+          state: Plex - Free Movies & TV
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Plex - Free Movies & TV
+        target:
+          entity_id: media_player.garage_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.garage_tv
+        state: NBC Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.garage_tv
+          state: NBC Sports
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: NBC Sports
+        target:
+          entity_id: media_player.garage_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.garage_tv
+        state: FOX Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.garage_tv
+          state: FOX Sports
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: FOX Sports
+        target:
+          entity_id: media_player.garage_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.garage_tv
+        state: CBS Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.garage_tv
+          state: CBS Sports Stream & Watch Live
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: CBS Sports Stream & Watch Live
+        target:
+          entity_id: media_player.garage_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.garage_tv
+        state: YouTube
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.garage_tv
+          state: YouTube
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: YouTube
+        target:
+          entity_id: media_player.garage_tv
+  mode: single
+- id: '1721770222540'
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.garage_tv_active_app
+  - platform: state
+    entity_id:
+    - media_player.garage_tv
+    from: 'off'
+    to:
+  - platform: state
+    entity_id:
+    - media_player.garage_tv
+    from: standby
+    to:
+  - platform: state
+    entity_id:
+    - media_player.garage_tv
+    from: unknown
+    to:
+  - platform: state
+    entity_id:
+    - media_player.garage_tv
+    from: unavailable
+    to:
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.garage_tv_active_app
+        state: Home
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.garage_tv
+          state: Home
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.garage_tv
+        data:
+          option: Home
+    - conditions:
+      - condition: state
+        entity_id: sensor.garage_tv_active_app
+        state: Plex - Free Movies & TV
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.garage_tv
+          state: Plex
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.garage_tv
+        data:
+          option: Plex
+    - conditions:
+      - condition: state
+        entity_id: sensor.garage_tv_active_app
+        state: YouTube
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.garage_tv
+          state: YouTube
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.garage_tv
+        data:
+          option: YouTube
+    - conditions:
+      - condition: state
+        entity_id: sensor.garage_tv_active_app
+        state: F1 TV
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.garage_tv
+          state: F1 TV
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.garage_tv
+        data:
+          option: F1 TV
+    - conditions:
+      - condition: state
+        entity_id: sensor.garage_tv_active_app
+        state: NBC Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.garage_tv
+          state: NBC Sports
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.garage_tv
+        data:
+          option: NBC Sports
+    - conditions:
+      - condition: state
+        entity_id: sensor.garage_tv_active_app
+        state: FOX Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.garage_tv
+          state: FOX Sports
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.garage_tv
+        data:
+          option: FOX Sports
+    - conditions:
+      - condition: state
+        entity_id: sensor.garage_tv_active_app
+        state: CBS Sports Stream & Watch Live
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.garage_tv
+          state: CBS Sports
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.garage_tv
+        data:
+          option: CBS Sports
+    - conditions:
+      - condition: state
+        entity_id: media_player.garage_tv
+        state: 'off'
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.garage_tv
+        data:
+          option: None
+    - conditions:
+      - condition: state
+        entity_id: media_player.garage_tv
+        state: standby
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.garage_tv
+        data:
+          option: None
+    default: []
+  mode: single
+- id: '1721770576949'
+  alias: Garage TV - Input Feedback
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.garage_tv_active_app
+  - platform: state
+    entity_id:
+    - media_player.garage_tv
+    from: 'off'
+    to:
+  - platform: state
+    entity_id:
+    - media_player.garage_tv
+    from: standby
+    to:
+  - platform: state
+    entity_id:
+    - media_player.garage_tv
+    from: unknown
+    to:
+  - platform: state
+    entity_id:
+    - media_player.garage_tv
+    from: unavailable
+    to:
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.garage_tv_active_app
+        state: Home
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.garage_tv
+          state: Home
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.garage_tv
+        data:
+          option: Home
+    - conditions:
+      - condition: state
+        entity_id: sensor.garage_tv_active_app
+        state: Plex - Free Movies & TV
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.garage_tv
+          state: Plex
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.garage_tv
+        data:
+          option: Plex
+    - conditions:
+      - condition: state
+        entity_id: sensor.garage_tv_active_app
+        state: YouTube
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.garage_tv
+          state: YouTube
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.garage_tv
+        data:
+          option: YouTube
+    - conditions:
+      - condition: state
+        entity_id: sensor.garage_tv_active_app
+        state: F1 TV
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.garage_tv
+          state: F1 TV
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.garage_tv
+        data:
+          option: F1 TV
+    - conditions:
+      - condition: state
+        entity_id: sensor.garage_tv_active_app
+        state: NBC Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.garage_tv
+          state: NBC Sports
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.garage_tv
+        data:
+          option: NBC Sports
+    - conditions:
+      - condition: state
+        entity_id: sensor.garage_tv_active_app
+        state: FOX Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.garage_tv
+          state: FOX Sports
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.garage_tv
+        data:
+          option: FOX Sports
+    - conditions:
+      - condition: state
+        entity_id: sensor.garage_tv_active_app
+        state: CBS Sports Stream & Watch Live
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.garage_tv
+          state: CBS Sports
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.garage_tv
+        data:
+          option: CBS Sports
+    - conditions:
+      - condition: state
+        entity_id: media_player.garage_tv
+        state: 'off'
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.garage_tv
+        data:
+          option: None
+    - conditions:
+      - condition: state
+        entity_id: media_player.garage_tv
+        state: standby
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.garage_tv
+        data:
+          option: None
+    default: []
+  mode: single
+- id: '1721957365401'
+  alias: Violet Bedroom - Sleep Mode Lighting - Increase
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_boolean.violet_bedroom_sleep_mode
+    to: 'on'
+  - platform: state
+    entity_id:
+    - light.violet_bedroom
+    attribute: brightness
+  - platform: state
+    entity_id:
+    - light.violet_bedroom
+    to: 'off'
+  condition:
+  - condition: state
+    entity_id: input_boolean.violet_bedroom_sleep_mode
+    state: 'on'
+  - condition: or
+    conditions:
+    - condition: numeric_state
+      entity_id: light.violet_bedroom
+      attribute: brightness
+      below: 25
+    - condition: state
+      entity_id: light.violet_bedroom
+      state: 'off'
+  action:
+  - alias: Turn up lights 1% each minute until 10% brightness
+    repeat:
+      while:
+      - condition: state
+        entity_id: input_boolean.violet_bedroom_sleep_mode
+        state: 'on'
+        alias: Confirm Sleep Mode still Enabled
+      - condition: or
+        conditions:
+        - condition: numeric_state
+          entity_id: light.violet_bedroom
+          attribute: brightness
+          below: 25
+        - condition: state
+          entity_id: light.violet_bedroom
+          state: 'off'
+      sequence:
+      - if:
+        - condition: state
+          entity_id: light.violet_bedroom
+          state: 'on'
+        then:
+        - service: light.turn_on
+          data:
+            brightness_step_pct: 1
+          alias: Turn Light Up 1%
+          target:
+            entity_id: light.violet_bedroom
+        - delay:
+            hours: 0
+            minutes: 1
+            seconds: 0
+            milliseconds: 0
+          alias: Wait for 1 Minute
+      - alias: Turn Light On to 1%
+        service: light.turn_on
+        data:
+          brightness_pct: 1
+        target:
+          entity_id: light.violet_bedroom
+      - delay:
+          hours: 0
+          minutes: 1
+          seconds: 0
+          milliseconds: 0
+        alias: Wait for 1 Minute
+  mode: single
+- id: '1721958652946'
+  alias: Living Room - Movie Mode Enabled
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_select.living_room_mode
+    to: Movie
+  condition:
+  - condition: state
+    entity_id: input_select.living_room_mode
+    state: Movie
+  action:
+  - service: light.turn_on
+    metadata: {}
+    data:
+      transition: 3
+      brightness_pct: 25
+    target:
+      entity_id:
+      - light.living_room_lights
+      - light.play_area
+      - light.front_hallway
+  - service: light.turn_on
+    metadata: {}
+    data:
+      transition: 3
+      brightness_pct: 100
+    target:
+      entity_id:
+      - light.living_room_entry
+  mode: single
+- id: '1721958790072'
+  alias: Living Room - Movie Mode - Movie Start
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - media_player.living_room
+    to: playing
+  condition:
+  - condition: state
+    entity_id: input_select.living_room_mode
+    state: Movie
+  action:
+  - service: light.turn_off
+    target:
+      entity_id:
+      - light.living_room_lights
+      - light.play_area
+      - light.living_room_entry
+      - light.front_hallway
+    data:
+      transition: 3
+  mode: single
+- id: '1721958843972'
+  alias: Living Room - Movie Mode - Movie Paused
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - media_player.living_room
+    to: paused
+    from: playing
+  condition:
+  - condition: state
+    entity_id: input_select.living_room_mode
+    state: Movie
+  action:
+  - service: light.turn_on
+    target:
+      entity_id:
+      - light.living_room_lights
+      - light.play_area
+      - light.front_hallway
+    data:
+      brightness_pct: 50
+      transition: 3
+  - service: light.turn_on
+    target:
+      entity_id:
+      - light.living_room_entry
+    data:
+      brightness_pct: 100
+      transition: 3
+  mode: single
+- id: '1721958934932'
+  alias: Living Room - Movie Mode - Movie End
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - media_player.living_room
+    to: 'off'
+    from: playing
+  - platform: state
+    entity_id:
+    - media_player.living_room
+    to: idle
+    from: playing
+  - platform: state
+    entity_id:
+    - media_player.living_room
+    to: standby
+    from: playing
+  - platform: state
+    entity_id:
+    - media_player.living_room
+    to: 'off'
+    from: paused
+  - platform: state
+    entity_id:
+    - media_player.living_room
+    to: idle
+    from: paused
+  - platform: state
+    entity_id:
+    - media_player.living_room
+    to: standby
+    from: paused
+  condition:
+  - condition: state
+    entity_id: input_select.living_room_mode
+    state: Movie
+  action:
+  - service: light.turn_on
+    target:
+      entity_id:
+      - light.living_room_lights
+      - light.play_area
+      - light.living_room_entry
+      - light.front_hallway
+    data:
+      brightness_pct: 100
+      transition: 5
+  - service: input_select.select_option
+    metadata: {}
+    data:
+      option: Default
+    target:
+      entity_id: input_select.living_room_mode
+  mode: single
+- id: '1721966753727'
+  alias: Backyard Sprinkler - Input Select
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_select.backyard_sprinklers
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.backyard_sprinklers
+        state: Grass 1
+      sequence:
+      - alias: Turn off Grass 2 if on
+        if:
+        - condition: state
+          entity_id: switch.grass_2_zone
+          state: 'on'
+        then:
+        - service: switch.turn_off
+          metadata: {}
+          data: {}
+          target:
+            entity_id: switch.grass_2_zone
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 5
+            milliseconds: 0
+      - alias: Turn off Planters if on
+        if:
+        - condition: state
+          entity_id: switch.planters_zone
+          state: 'on'
+        then:
+        - service: switch.turn_off
+          metadata: {}
+          data: {}
+          target:
+            entity_id: switch.planters_zone
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 5
+            milliseconds: 0
+      - alias: Turn on Grass 1 if off
+        if:
+        - condition: state
+          entity_id: switch.grass_1_zone
+          state: 'off'
+        then:
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id: switch.grass_1_zone
+    - conditions:
+      - condition: state
+        entity_id: input_select.backyard_sprinklers
+        state: Grass 2
+      sequence:
+      - alias: Turn off Grass 1 if on
+        if:
+        - condition: state
+          entity_id: switch.grass_1_zone
+          state: 'on'
+        then:
+        - service: switch.turn_off
+          metadata: {}
+          data: {}
+          target:
+            entity_id: switch.grass_1_zone
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 5
+            milliseconds: 0
+      - alias: Turn off Planters if on
+        if:
+        - condition: state
+          entity_id: switch.planters_zone
+          state: 'on'
+        then:
+        - service: switch.turn_off
+          metadata: {}
+          data: {}
+          target:
+            entity_id: switch.planters_zone
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 5
+            milliseconds: 0
+      - alias: Turn on Grass 1 if off
+        if:
+        - condition: state
+          entity_id: switch.grass_2_zone
+          state: 'off'
+        then:
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id: switch.grass_2_zone
+    - conditions:
+      - condition: state
+        entity_id: input_select.backyard_sprinklers
+        state: Planters
+      sequence:
+      - alias: Turn off Grass 1 if on
+        if:
+        - condition: state
+          entity_id: switch.grass_1_zone
+          state: 'on'
+        then:
+        - service: switch.turn_off
+          metadata: {}
+          data: {}
+          target:
+            entity_id: switch.grass_1_zone
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 5
+            milliseconds: 0
+      - alias: Turn off Grass 2 if on
+        if:
+        - condition: state
+          entity_id: switch.grass_2_zone
+          state: 'on'
+        then:
+        - service: switch.turn_off
+          metadata: {}
+          data: {}
+          target:
+            entity_id: switch.grass_2_zone
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 5
+            milliseconds: 0
+      - alias: Turn on Planters if off
+        if:
+        - condition: state
+          entity_id: switch.planters_zone
+          state: 'off'
+        then:
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id: switch.planters_zone
+    - conditions:
+      - condition: state
+        entity_id: input_select.backyard_sprinklers
+        state: 'Off'
+      sequence:
+      - alias: Turn off Grass 1 if on
+        if:
+        - condition: state
+          entity_id: switch.grass_1_zone
+          state: 'on'
+        then:
+        - service: switch.turn_off
+          metadata: {}
+          data: {}
+          target:
+            entity_id: switch.grass_1_zone
+      - if:
+        - condition: state
+          entity_id: switch.grass_2_zone
+          state: 'on'
+        then:
+        - service: switch.turn_off
+          metadata: {}
+          data: {}
+          target:
+            entity_id: switch.grass_2_zone
+        alias: Turn off Grass 2 if on
+      - alias: Turn off Planters if on
+        if:
+        - condition: state
+          entity_id: switch.planters_zone
+          state: 'on'
+        then:
+        - service: switch.turn_off
+          metadata: {}
+          data: {}
+          target:
+            entity_id: switch.planters_zone
+  mode: single
+- id: '1721966926981'
+  alias: Backyard Sprinklers - Input Feedback
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.grass_1_zone
+  - platform: state
+    entity_id:
+    - switch.grass_2_zone
+  - platform: state
+    entity_id:
+    - switch.planters_zone
+  - platform: state
+    entity_id:
+    - sensor.sprinkler_state
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: switch.grass_1_zone
+        state: 'on'
+      sequence:
+      - service: input_select.select_option
+        metadata: {}
+        data:
+          option: Grass 1
+        target:
+          entity_id: input_select.backyard_sprinklers
+    - conditions:
+      - condition: state
+        entity_id: switch.grass_2_zone
+        state: 'on'
+      sequence:
+      - service: input_select.select_option
+        metadata: {}
+        data:
+          option: Grass 2
+        target:
+          entity_id: input_select.backyard_sprinklers
+    - conditions:
+      - condition: state
+        entity_id: switch.planters_zone
+        state: 'on'
+      sequence:
+      - service: input_select.select_option
+        metadata: {}
+        data:
+          option: Planters
+        target:
+          entity_id: input_select.backyard_sprinklers
+    - conditions:
+      - condition: state
+        state: 'off'
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 0
+        entity_id: sensor.sprinkler_state
+      sequence:
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 6
+          milliseconds: 0
+      - service: input_select.select_option
+        metadata: {}
+        data:
+          option: 'Off'
+        target:
+          entity_id: input_select.backyard_sprinklers
+  mode: single
+- id: '1722055370533'
+  alias: Master Bedroom TV - Input Feedback
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.master_bedroom_tv_active_app
+  - platform: state
+    entity_id:
+    - media_player.master_bedroom_tv
+    from: 'off'
+    to:
+  - platform: state
+    entity_id:
+    - media_player.master_bedroom_tv
+    from: standby
+    to:
+  - platform: state
+    entity_id:
+    - media_player.master_bedroom_tv
+    from: unknown
+    to:
+  - platform: state
+    entity_id:
+    - media_player.master_bedroom_tv
+    from: unavailable
+    to:
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.master_bedroom_tv_active_app
+        state: Nintendo Switch
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.master_bedroom_tv
+          state: Nintendo Switch
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.master_bedroom_tv
+        data:
+          option: Nintendo Switch
+    - conditions:
+      - condition: state
+        entity_id: sensor.master_bedroom_tv_active_app
+        state: Master Bedroom
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.master_bedroom_tv
+          state: Apple TV
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.master_bedroom_tv
+        data:
+          option: Apple TV
+    - conditions:
+      - condition: state
+        entity_id: media_player.master_bedroom_tv
+        state: 'off'
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.master_bedroom_tv
+        data:
+          option: None
+    - conditions:
+      - condition: state
+        entity_id: media_player.master_bedroom_tv
+        state: standby
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.master_bedroom_tv
+        data:
+          option: None
+    - conditions:
+      - condition: state
+        entity_id: media_player.master_bedroom_tv
+        state: idle
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.master_bedroom_tv
+        data:
+          option: None
+    default: []
+  mode: single
+- id: '1722055536633'
+  alias: Master Bedroom TV - Input Select
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_select.master_bedroom_tv
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.master_bedroom_tv
+        state: Apple TV
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.master_bedroom_tv
+          state: Master Bedroom
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Master Bedroom
+        target:
+          entity_id: media_player.master_bedroom_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.master_bedroom_tv
+        state: Nintendo Switch
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.master_bedroom_tv
+          state: Nintendo Switch
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Nintendo Switch
+        target:
+          entity_id: media_player.master_bedroom_tv
+  mode: single
+- id: '1722055680697'
+  alias: Living Room TV - Input Feedback
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.living_room_tv_source
+  - platform: state
+    entity_id:
+    - media_player.living_room_tv
+    from: 'off'
+    to:
+  - platform: state
+    entity_id:
+    - media_player.living_room_tv
+    from: standby
+    to:
+  - platform: state
+    entity_id:
+    - media_player.living_room_tv
+    from: unknown
+    to:
+  - platform: state
+    entity_id:
+    - media_player.living_room_tv
+    from: unavailable
+    to:
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.living_room_tv_source
+        state: Nintendo Switch
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.living_room_tv
+          state: Nintendo Switch
+      sequence:
+      - target:
+          entity_id: input_select.living_room_tv
+        data:
+          option: Nintendo Switch
+        action: input_select.select_option
+    - conditions:
+      - condition: state
+        entity_id: media_player.living_room_tv
+        state: Apple
+        attribute: source
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.living_room_tv
+          state: Apple TV
+      sequence:
+      - target:
+          entity_id: input_select.living_room_tv
+        data:
+          option: Apple TV
+        action: input_select.select_option
+    - conditions:
+      - condition: state
+        entity_id: media_player.living_room_tv
+        state: 'off'
+      sequence:
+      - target:
+          entity_id: input_select.living_room_tv
+        data:
+          option: None
+        action: input_select.select_option
+    - conditions:
+      - condition: state
+        entity_id: media_player.living_room_tv
+        state: standby
+      sequence:
+      - target:
+          entity_id: input_select.living_room_tv
+        data:
+          option: None
+        action: input_select.select_option
+    - conditions:
+      - condition: state
+        entity_id: media_player.living_room_tv
+        state: idle
+      sequence:
+      - target:
+          entity_id: input_select.living_room_tv
+        data:
+          option: None
+        action: input_select.select_option
+    default: []
+  mode: single
+- id: '1722055812776'
+  alias: Living Room TV - Input Select
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_select.living_room_tv
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.living_room_tv
+        state: Apple TV
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.living_room_tv
+          state: Apple
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Apple
+        target:
+          entity_id: media_player.living_room_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.living_room_tv
+        state: Nintendo Switch
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.living_room_tv
+          state: Nintendo Switch
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Nintendo Switch
+        target:
+          entity_id: media_player.living_room_tv
+  mode: single
+- id: '1722056144314'
+  alias: Master Bedroom - Input Select
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_select.master_bedroom_apple_tv
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.master_bedroom_apple_tv
+        state: Plex
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.master_bedroom_apple_tv
+          state: Plex
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Plex
+        target:
+          entity_id: media_player.master_bedroom_apple_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.master_bedroom_apple_tv
+        state: YouTube
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.master_bedroom_apple_tv
+          state: YouTube
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: YouTube
+        target:
+          entity_id: media_player.master_bedroom_apple_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.master_bedroom_apple_tv
+        state: Dropout
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.master_bedroom_apple_tv
+          state: Dropout
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Dropout
+        target:
+          entity_id: media_player.master_bedroom_apple_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.master_bedroom_apple_tv
+        state: Prime Video
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.master_bedroom_apple_tv
+          state: Prime Video
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Prime Video
+        target:
+          entity_id: media_player.master_bedroom_apple_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.master_bedroom_apple_tv
+        state: Disney+
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.master_bedroom_apple_tv
+          state: Disney+
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Disney+
+        target:
+          entity_id: media_player.master_bedroom_apple_tv
+  mode: single
+- id: '1722056255929'
+  alias: Living Room Apple TV - Input Select
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_select.living_room_apple_tv
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.living_room_apple_tv
+        state: Plex
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.living_room
+          state: Plex
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Plex
+        target:
+          entity_id: media_player.living_room
+    - conditions:
+      - condition: state
+        entity_id: input_select.living_room_apple_tv
+        state: YouTube
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.living_room
+          state: YouTube
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: YouTube
+        target:
+          entity_id: media_player.living_room
+    - conditions:
+      - condition: state
+        entity_id: input_select.living_room_apple_tv
+        state: Dropout
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.living_room
+          state: Dropout
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Dropout
+        target:
+          entity_id: media_player.living_room
+    - conditions:
+      - condition: state
+        entity_id: input_select.living_room_apple_tv
+        state: Prime Video
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.living_room
+          state: Prime Video
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Prime Video
+        target:
+          entity_id: media_player.living_room
+    - conditions:
+      - condition: state
+        entity_id: input_select.living_room_apple_tv
+        state: Disney+
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.living_room
+          state: Disney+
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Disney+
+        target:
+          entity_id: media_player.living_room
+    - conditions:
+      - condition: state
+        entity_id: input_select.living_room_apple_tv
+        state: F1 TV
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.living_room
+          state: F1 TV
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: F1 TV
+        target:
+          entity_id: media_player.living_room
+    - conditions:
+      - condition: state
+        entity_id: input_select.living_room_apple_tv
+        state: NBC Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.living_room
+          state: NBC Sports
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: NBC Sports
+        target:
+          entity_id: media_player.living_room
+    - conditions:
+      - condition: state
+        entity_id: input_select.living_room_apple_tv
+        state: FOX Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.living_room
+          state: FOX Sports
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: FOX Sports
+        target:
+          entity_id: media_player.living_room
+    - conditions:
+      - condition: state
+        entity_id: input_select.living_room_apple_tv
+        state: CBS Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.living_room
+          state: CBS Sports
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: CBS Sports
+        target:
+          entity_id: media_player.living_room
+  mode: single
+- id: '1722056337653'
+  alias: Master Bedroom Apple TV - Input Select
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_select.master_bedroom_apple_tv
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.master_bedroom_apple_tv
+        state: Plex
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.master_bedroom
+          state: Plex
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Plex
+        target:
+          entity_id: media_player.master_bedroom
+    - conditions:
+      - condition: state
+        entity_id: input_select.master_bedroom_apple_tv
+        state: YouTube
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.master_bedroom
+          state: YouTube
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: YouTube
+        target:
+          entity_id: media_player.master_bedroom
+    - conditions:
+      - condition: state
+        entity_id: input_select.master_bedroom_apple_tv
+        state: Dropout
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.master_bedroom
+          state: Dropout
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Dropout
+        target:
+          entity_id: media_player.master_bedroom
+    - conditions:
+      - condition: state
+        entity_id: input_select.master_bedroom_apple_tv
+        state: Prime Video
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.master_bedroom
+          state: Prime Video
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Prime Video
+        target:
+          entity_id: media_player.master_bedroom
+    - conditions:
+      - condition: state
+        entity_id: input_select.master_bedroom_apple_tv
+        state: Disney+
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.master_bedroom
+          state: Disney+
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Disney+
+        target:
+          entity_id: media_player.master_bedroom
+    - conditions:
+      - condition: state
+        entity_id: input_select.master_bedroom_apple_tv
+        state: F1 TV
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.master_bedroom
+          state: F1 TV
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: F1 TV
+        target:
+          entity_id: media_player.master_bedroom
+    - conditions:
+      - condition: state
+        entity_id: input_select.master_bedroom_apple_tv
+        state: NBC Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.master_bedroom
+          state: NBC Sports
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: NBC Sports
+        target:
+          entity_id: media_player.master_bedroom
+    - conditions:
+      - condition: state
+        entity_id: input_select.master_bedroom_apple_tv
+        state: FOX Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.master_bedroom
+          state: FOX Sports
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: FOX Sports
+        target:
+          entity_id: media_player.master_bedroom
+    - conditions:
+      - condition: state
+        entity_id: input_select.master_bedroom_apple_tv
+        state: CBS Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.master_bedroom
+          state: CBS Sports
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: CBS Sports
+        target:
+          entity_id: media_player.master_bedroom
+  mode: single
+- id: '1722058750583'
+  alias: Living Room Apple TV - Input Feedback
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.living_room_apple_tv_source
+  - platform: state
+    entity_id:
+    - media_player.living_room
+    from: 'off'
+    to:
+  - platform: state
+    entity_id:
+    - media_player.living_room
+    from: standby
+    to:
+  - platform: state
+    entity_id:
+    - media_player.living_room
+    from: unknown
+    to:
+  - platform: state
+    entity_id:
+    - media_player.living_room
+    from: unavailable
+    to:
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.living_room_apple_tv_source
+        state: Plex
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.living_room_apple_tv
+          state: Plex
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.living_room_apple_tv
+        data:
+          option: Plex
+    - conditions:
+      - condition: state
+        entity_id: sensor.living_room_apple_tv_source
+        state: YouTube
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.living_room_apple_tv
+          state: YouTube
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.living_room_apple_tv
+        data:
+          option: YouTube
+    - conditions:
+      - condition: state
+        entity_id: sensor.living_room_apple_tv_source
+        state: F1 TV
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.living_room_apple_tv
+          state: F1 TV
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.living_room_apple_tv
+        data:
+          option: F1 TV
+    - conditions:
+      - condition: state
+        entity_id: sensor.living_room_apple_tv_source
+        state: NBC Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.living_room_apple_tv
+          state: NBC Sports
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.living_room_apple_tv
+        data:
+          option: NBC Sports
+    - conditions:
+      - condition: state
+        entity_id: sensor.living_room_apple_tv_source
+        state: FOX Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.living_room_apple_tv
+          state: FOX Sports
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.living_room_apple_tv
+        data:
+          option: FOX Sports
+    - conditions:
+      - condition: state
+        entity_id: sensor.living_room_apple_tv_source
+        state: CBS Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.living_room_apple_tv
+          state: CBS Sports
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.living_room_apple_tv
+        data:
+          option: CBS Sports
+    - conditions:
+      - condition: state
+        entity_id: sensor.living_room_apple_tv_source
+        state: Dropout
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.living_room_apple_tv
+          state: Dropout
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.living_room_apple_tv
+        data:
+          option: Dropout
+    - conditions:
+      - condition: state
+        entity_id: media_player.living_room
+        state: 'off'
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.living_room_apple_tv
+        data:
+          option: None
+    - conditions:
+      - condition: state
+        entity_id: media_player.living_room
+        state: standby
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.living_room_apple_tv
+        data:
+          option: None
+    - conditions:
+      - condition: state
+        entity_id: media_player.living_room
+        state: idle
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.living_room_apple_tv
+        data:
+          option: Home
+    default: []
+  mode: single
+- id: '1722058781512'
+  alias: Master Bedroom Apple TV - Input Feedback
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.master_bedroom_apple_tv_source
+  - platform: state
+    entity_id:
+    - media_player.master_bedroom
+    from: 'off'
+    to:
+  - platform: state
+    entity_id:
+    - media_player.master_bedroom
+    from: standby
+    to:
+  - platform: state
+    entity_id:
+    - media_player.master_bedroom
+    from: unknown
+    to:
+  - platform: state
+    entity_id:
+    - media_player.master_bedroom
+    from: unavailable
+    to:
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.master_bedroom_apple_tv_source
+        state: Plex
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.master_bedroom_apple_tv
+          state: Plex
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.master_bedroom_apple_tv
+        data:
+          option: Plex
+    - conditions:
+      - condition: state
+        entity_id: sensor.master_bedroom_apple_tv_source
+        state: YouTube
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.master_bedroom_apple_tv
+          state: YouTube
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.master_bedroom_apple_tv
+        data:
+          option: YouTube
+    - conditions:
+      - condition: state
+        entity_id: sensor.master_bedroom_apple_tv_source
+        state: F1 TV
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.master_bedroom_apple_tv
+          state: F1 TV
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.master_bedroom_apple_tv
+        data:
+          option: F1 TV
+    - conditions:
+      - condition: state
+        entity_id: sensor.master_bedroom_apple_tv_source
+        state: NBC Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.master_bedroom_apple_tv
+          state: NBC Sports
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.master_bedroom_apple_tv
+        data:
+          option: NBC Sports
+    - conditions:
+      - condition: state
+        entity_id: sensor.master_bedroom_apple_tv_source
+        state: FOX Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.master_bedroom_apple_tv
+          state: FOX Sports
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.master_bedroom_apple_tv
+        data:
+          option: FOX Sports
+    - conditions:
+      - condition: state
+        entity_id: sensor.master_bedroom_apple_tv_source
+        state: CBS Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.master_bedroom_apple_tv
+          state: CBS Sports
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.master_bedroom_apple_tv
+        data:
+          option: CBS Sports
+    - conditions:
+      - condition: state
+        entity_id: sensor.master_bedroom_apple_tv_source
+        state: Dropout
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.master_bedroom_apple_tv
+          state: Dropout
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.master_bedroom_apple_tv
+        data:
+          option: Dropout
+    - conditions:
+      - condition: state
+        entity_id: media_player.master_bedroom
+        state: 'off'
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.master_bedroom_apple_tv
+        data:
+          option: None
+    - conditions:
+      - condition: state
+        entity_id: media_player.master_bedroom
+        state: standby
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.master_bedroom_apple_tv
+        data:
+          option: None
+    - conditions:
+      - condition: state
+        entity_id: media_player.master_bedroom
+        state: idle
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.master_bedroom_apple_tv
+        data:
+          option: Home
+    default: []
+  mode: single
+- id: '1722059259998'
+  alias: Dining Room TV - Input Select
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_select.dining_room_tv
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.dining_room_tv
+        state: F1 TV
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.dining_room_tv
+          state: F1 TV
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: F1 TV
+        target:
+          entity_id: media_player.dining_room_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.dining_room_tv
+        state: Plex
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.dining_room_tv
+          state: Plex - Free Movies & TV
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Plex - Free Movies & TV
+        target:
+          entity_id: media_player.dining_room_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.dining_room_tv
+        state: NBC Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.dining_room_tv
+          state: NBC Sports
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: NBC Sports
+        target:
+          entity_id: media_player.dining_room_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.dining_room_tv
+        state: FOX Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.dining_room_tv
+          state: FOX Sports
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: FOX Sports
+        target:
+          entity_id: media_player.dining_room_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.dining_room_tv
+        state: CBS Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.dining_room_tv
+          state: CBS Sports Stream & Watch Live
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: CBS Sports Stream & Watch Live
+        target:
+          entity_id: media_player.dining_room_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.dining_room_tv
+        state: YouTube
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.dining_room_tv
+          state: YouTube
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: YouTube
+        target:
+          entity_id: media_player.dining_room_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.dining_room_tv
+        state: Dropout
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.dining_room_tv
+          state: Dropout
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Dropout
+        target:
+          entity_id: media_player.dining_room_tv
+    - conditions:
+      - condition: state
+        entity_id: input_select.dining_room_tv
+        state: Home
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.dining_room_tv
+          state: Home
+          attribute: source
+      sequence:
+      - service: media_player.select_source
+        metadata: {}
+        data:
+          source: Home
+        target:
+          entity_id: media_player.dining_room_tv
+  mode: single
+- id: '1722059411563'
+  alias: Dining Room TV - Input Feedback
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.dining_room_tv_active_app
+  - platform: state
+    entity_id:
+    - media_player.dining_room_tv
+    from: 'off'
+    to:
+  - platform: state
+    entity_id:
+    - media_player.dining_room_tv
+    from: standby
+    to:
+  - platform: state
+    entity_id:
+    - media_player.dining_room_tv
+    from: unknown
+    to:
+  - platform: state
+    entity_id:
+    - media_player.dining_room_tv
+    from: unavailable
+    to:
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.dining_room_tv_active_app
+        state: Plex - Free Movies & TV
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.dining_room_tv
+          state: Plex
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.dining_room_tv
+        data:
+          option: Plex
+    - conditions:
+      - condition: state
+        entity_id: sensor.dining_room_tv_active_app
+        state: YouTube
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.dining_room_tv
+          state: YouTube
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.dining_room_tv
+        data:
+          option: YouTube
+    - conditions:
+      - condition: state
+        entity_id: sensor.dining_room_tv_active_app
+        state: F1 TV
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.dining_room_tv
+          state: F1 TV
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.dining_room_tv
+        data:
+          option: F1 TV
+    - conditions:
+      - condition: state
+        entity_id: sensor.dining_room_tv_active_app
+        state: NBC Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.dining_room_tv
+          state: NBC Sports
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.dining_room_tv
+        data:
+          option: NBC Sports
+    - conditions:
+      - condition: state
+        entity_id: sensor.dining_room_tv_active_app
+        state: FOX Sports
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.dining_room_tv
+          state: FOX Sports
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.dining_room_tv
+        data:
+          option: FOX Sports
+    - conditions:
+      - condition: state
+        entity_id: sensor.dining_room_tv_active_app
+        state: CBS Sports Stream & Watch Live
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.dining_room_tv
+          state: CBS Sports
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.dining_room_tv
+        data:
+          option: CBS Sports
+    - conditions:
+      - condition: state
+        entity_id: sensor.dining_room_tv_active_app
+        state: Home
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.dining_room_tv
+          state: Home
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.dining_room_tv
+        data:
+          option: Home
+    - conditions:
+      - condition: state
+        entity_id: sensor.dining_room_tv_active_app
+        state: Dropout
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.dining_room_tv
+          state: Dropout
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.dining_room_tv
+        data:
+          option: Dropout
+    - conditions:
+      - condition: state
+        entity_id: sensor.dining_room_tv_active_app
+        state: Aquatic Life
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.dining_room_tv
+          state: None
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.dining_room_tv
+        data:
+          option: None
+    - conditions:
+      - condition: state
+        entity_id: media_player.dining_room_tv
+        state: 'off'
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.dining_room_tv
+        data:
+          option: None
+    - conditions:
+      - condition: state
+        entity_id: media_player.dining_room_tv
+        state: standby
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.dining_room_tv
+        data:
+          option: None
+    default: []
+  mode: single
+- id: '1722314723998'
+  alias: Kelly Presence
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.kelly_s_iphone_ble
+    to:
+  - platform: state
+    entity_id:
+    - input_boolean.kelly_presence_override
+    to: 'off'
+  condition:
+  - condition: state
+    entity_id: input_boolean.kelly_presence_override
+    state: 'off'
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.kelly_s_iphone_ble
+        state: living_room
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.kelly_presence
+        data:
+          option: Living Room
+    - conditions:
+      - condition: state
+        entity_id: sensor.kelly_s_iphone_ble
+        state: kitchen
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.kelly_presence
+        data:
+          option: Kitchen
+    - conditions:
+      - condition: state
+        entity_id: sensor.kelly_s_iphone_ble
+        state: master_bedroom
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.kelly_presence
+        data:
+          option: Master Bedroom
+    - conditions:
+      - condition: state
+        entity_id: sensor.kelly_s_iphone_ble
+        state: office
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.kelly_presence
+        data:
+          option: Office
+    - conditions:
+      - condition: state
+        entity_id: sensor.kelly_s_iphone_ble
+        state: garage
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.kelly_presence
+        data:
+          option: Garage
+    - conditions:
+      - condition: state
+        entity_id: sensor.kelly_s_iphone_ble
+        state: violet_s_bedroom
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.kelly_presence
+        data:
+          option: Violet's Bedroom
+    - conditions:
+      - condition: state
+        entity_id: sensor.kelly_s_iphone_ble
+        state: kelly_carley_bedroom
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.kelly_presence
+        data:
+          option: Kelly & Carley's Bedroom
+    - conditions:
+      - condition: state
+        entity_id: sensor.kelly_s_iphone_ble
+        state: backyard
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.kelly_presence
+        data:
+          option: Backyard
+  mode: single
+- id: '1722314745177'
+  alias: Ally Presence
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.ally_s_iphone_ble
+    to:
+  - platform: state
+    entity_id:
+    - input_boolean.ally_presence_override
+    to: 'off'
+  condition:
+  - condition: state
+    entity_id: input_boolean.ally_presence_override
+    state: 'off'
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.ally_s_iphone_ble
+        state: living_room
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.ally_presence
+        data:
+          option: Living Room
+    - conditions:
+      - condition: state
+        entity_id: sensor.ally_s_iphone_ble
+        state: kitchen
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.ally_presence
+        data:
+          option: Kitchen
+    - conditions:
+      - condition: state
+        entity_id: sensor.ally_s_iphone_ble
+        state: master_bedroom
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.ally_presence
+        data:
+          option: Master Bedroom
+    - conditions:
+      - condition: state
+        entity_id: sensor.ally_s_iphone_ble
+        state: office
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.ally_presence
+        data:
+          option: Office
+    - conditions:
+      - condition: state
+        entity_id: sensor.ally_s_iphone_ble
+        state: garage
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.ally_presence
+        data:
+          option: Garage
+    - conditions:
+      - condition: state
+        entity_id: sensor.ally_s_iphone_ble
+        state: violet_s_bedroom
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.ally_presence
+        data:
+          option: Violet's Bedroom
+    - conditions:
+      - condition: state
+        entity_id: sensor.ally_s_iphone_ble
+        state: ally_carley_bedroom
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.ally_presence
+        data:
+          option: Kelly & Carley's Bedroom
+    - conditions:
+      - condition: state
+        entity_id: sensor.ally_s_iphone_ble
+        state: backyard
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.ally_presence
+        data:
+          option: Backyard
+  mode: single
+- id: '1722314765375'
+  alias: Carley Presence
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.carley_s_iphone_ble
+    to:
+  - platform: state
+    entity_id:
+    - input_boolean.carley_presence_override
+    to: 'off'
+  condition:
+  - condition: state
+    entity_id: input_boolean.carley_presence_override
+    state: 'off'
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.carley_s_iphone_ble
+        state: living_room
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.carley_presence
+        data:
+          option: Living Room
+    - conditions:
+      - condition: state
+        entity_id: sensor.carley_s_iphone_ble
+        state: kitchen
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.carley_presence
+        data:
+          option: Kitchen
+    - conditions:
+      - condition: state
+        entity_id: sensor.carley_s_iphone_ble
+        state: master_bedroom
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.carley_presence
+        data:
+          option: Master Bedroom
+    - conditions:
+      - condition: state
+        entity_id: sensor.carley_s_iphone_ble
+        state: office
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.carley_presence
+        data:
+          option: Office
+    - conditions:
+      - condition: state
+        entity_id: sensor.carley_s_iphone_ble
+        state: garage
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.carley_presence
+        data:
+          option: Garage
+    - conditions:
+      - condition: state
+        entity_id: sensor.carley_s_iphone_ble
+        state: violet_s_bedroom
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.carley_presence
+        data:
+          option: Violet's Bedroom
+    - conditions:
+      - condition: state
+        entity_id: sensor.carley_s_iphone_ble
+        state: carley_carley_bedroom
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.carley_presence
+        data:
+          option: Kelly & Carley's Bedroom
+    - conditions:
+      - condition: state
+        entity_id: sensor.carley_s_iphone_ble
+        state: backyard
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.carley_presence
+        data:
+          option: Backyard
+  mode: single
+- id: '1723931603207'
+  alias: PiHole Input Select
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_select.pihole
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.pihole
+        state: Disabled
+      sequence:
+      - action: switch.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.pi_hole
+    - conditions:
+      - condition: state
+        entity_id: input_select.pihole
+        state: Enabled
+      sequence:
+      - action: switch.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.pi_hole
+  mode: single
+- id: '1723931819150'
+  alias: Pihole Input Feedback
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.pi_hole
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: switch.pi_hole
+        state: 'off'
+      sequence:
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.pihole
+        data:
+          option: Disabled
+    - conditions:
+      - condition: state
+        entity_id: switch.pi_hole
+        state: 'on'
+      sequence:
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.pihole
+        data:
+          option: Enabled
+  mode: single
+- id: '1724035916576'
+  alias: Connectivity Check
+  description: ''
+  trigger:
+  - platform: time_pattern
+    seconds: '0'
+  condition: []
+  action:
+  - action: homeassistant.update_entity
+    metadata: {}
+    data:
+      entity_id:
+      - binary_sensor.tvh_cbhomelab_net
+      - binary_sensor.plex_cbhomelab_net
+      - binary_sensor.bazarr_cbhomelab_net
+      - binary_sensor.unifi_cbhomelab_net
+      - binary_sensor.intranet_cbhomelab_net
+      - binary_sensor.sonarr_cbhomelab_net
+      - binary_sensor.radarr_cbhomelab_net
+      - binary_sensor.lidarr_cbhomelab_net
+      - binary_sensor.audiobooks_cbhomelab_net
+      - binary_sensor.ebooks_cbhomelab_net
+      - binary_sensor.maintainerr_cbhomelab_net
+      - binary_sensor.tvh_config_cbhomelab_net
+      - binary_sensor.pihole_cbhomelab_net
+      - binary_sensor.neptune_cbhomelab_net
+      - binary_sensor.sabnzbd_cbhomelab_net
+      - binary_sensor.torrent_cbhomelab_net
+      - binary_sensor.overseerr_cbhomelab_net
+      - binary_sensor.tautulli_cbhomelab_net
+      - binary_sensor.it_tools_cbhomelab_net
+      - binary_sensor.prowlarr_cbhomelab_net
+      - binary_sensor.tdarr_cbhomelab_net
+  mode: single
+- id: '1726184640707'
+  alias: Garage - Turn on lights if any door opens
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - cover.garage_door
+    to: open
+    from: closed
+  - platform: state
+    entity_id:
+    - binary_sensor.garage_entry_door_window_door_is_open
+    to: 'on'
+    from: 'off'
+  - platform: state
+    entity_id:
+    - binary_sensor.garage_side_door
+    to: 'on'
+    from: 'off'
+  condition: []
+  action:
+  - data: {}
+    target:
+      entity_id: light.garage
+    action: light.turn_on
+  mode: single
+- id: '1726184726831'
+  alias: Laundry Room - Turn on lights if doors open
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.laundry_room_door
+    to: 'on'
+    from: 'off'
+  - platform: state
+    entity_id:
+    - binary_sensor.garage_entry_door_window_door_is_open
+    to: 'on'
+    from: 'off'
+  condition: []
+  action:
+  - data: {}
+    action: light.turn_on
+    target:
+      entity_id: light.laundry_room
+  mode: single
+- id: '1726184760440'
+  alias: Master Closet - Lights on if door opens
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.master_closet_door_window_door_is_open
+    to: 'on'
+    from: 'off'
+  condition: []
+  action:
+  - data: {}
+    action: light.turn_on
+    target:
+      entity_id: light.master_closet
+  mode: single
+- id: '1726184784741'
+  alias: Master Bathroom - Door Open turns Lights On
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.master_bathroom_door_window_door_is_open
+    to: 'on'
+    from: 'off'
+  condition: []
+  action:
+  - data: {}
+    action: light.turn_on
+    target:
+      entity_id: light.master_bathroom
+  mode: single
+- id: '1726184807698'
+  alias: Guest Bathroom - Lights On if Door Opens
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.guest_bathroom_door_window_door_is_open
+    to: 'on'
+    from: 'off'
+  condition: []
+  action:
+  - data: {}
+    action: light.turn_on
+    target:
+      entity_id: light.guest_bathroom
+  mode: single
+- id: '1726185708081'
+  alias: Guest Bathroom - Latch Lights if door closed
+  description: ''
+  triggers:
+  - entity_id:
+    - binary_sensor.guest_bathroom_door_window_door_is_open
+    from: 'on'
+    to: 'off'
+    trigger: state
+  conditions: []
+  actions:
+  - action: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.magic_areas_light_groups_guest_bathroom_light_control
+  - wait_for_trigger:
+    - entity_id:
+      - binary_sensor.guest_bathroom_door_window_door_is_open
+      from: 'off'
+      to: 'on'
+      trigger: state
+  - action: switch.turn_on
+    target:
+      entity_id:
+      - switch.magic_areas_light_groups_guest_bathroom_light_control
+    data: {}
+    enabled: false
+  mode: single
+- id: '1726185802485'
+  alias: Master Bathroom - Latch lights if door closed
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.master_bathroom_door_window_door_is_open
+    from: 'on'
+    to: 'off'
+  condition: []
+  action:
+  - action: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.magic_areas_light_groups_master_bathroom_light_control
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - binary_sensor.master_bathroom_door_window_door_is_open
+      from: 'off'
+      to: 'on'
+  - action: switch.turn_on
+    target:
+      entity_id:
+      - switch.magic_areas_light_groups_master_bathroom_light_control
+    data: {}
+  mode: single

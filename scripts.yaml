@@ -1,0 +1,771 @@
+master_bedroom_tv_toggle:
+  alias: Master Bedroom TV - Toggle
+  sequence:
+  - if:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: media_player.master_bedroom_tv
+        state: 'on'
+    then:
+    - service: remote.send_command
+      metadata: {}
+      data:
+        num_repeats: 1
+        delay_secs: 0.1
+        hold_secs: 1
+        command: power
+      target:
+        entity_id: remote.master_bedroom_tv
+    - type: turn_on
+      device_id: dca63938337a3bc47044ecb327bb8fb8
+      entity_id: 3b5853f6f430e1b374fdfe4d97020ff9
+      domain: remote
+    - wait_template: '{{ (states("media_player.master_bedroom_tv") == ''on'') }}'
+      continue_on_timeout: true
+    - service: media_player.select_source
+      metadata: {}
+      data:
+        source: Master Bedroom
+      target:
+        entity_id: media_player.master_bedroom_tv
+    else:
+    - service: remote.send_command
+      metadata: {}
+      data:
+        num_repeats: 1
+        delay_secs: 0.1
+        hold_secs: 1
+        command: power
+      target:
+        entity_id: remote.master_bedroom_tv
+    - type: turn_off
+      device_id: dca63938337a3bc47044ecb327bb8fb8
+      entity_id: 3b5853f6f430e1b374fdfe4d97020ff9
+      domain: remote
+  mode: single
+  icon: mdi:remote-tv
+master_bedroom_tv_nintendo_switch:
+  alias: Master Bedroom TV - Nintendo Switch
+  sequence:
+  - if:
+    - condition: device
+      type: is_on
+      device_id: bc7126e259b0765e144923dba8a6677c
+      entity_id: 34a21b486daa09a2e51de01d57f2439d
+      domain: remote
+    then:
+    - if:
+      - condition: state
+        entity_id: sensor.master_bedroom_tv_active_app
+        state: Master Bedroom
+      then:
+      - service: remote.send_command
+        metadata: {}
+        data:
+          num_repeats: 1
+          delay_secs: 0.1
+          hold_secs: 0
+          command: pause
+        target:
+          entity_id: remote.master_bedroom
+      else:
+      - service: media_player.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: media_player.master_bedroom_tv
+      - wait_template: '{{ (states("media_player.master_bedroom_tv") == ''on'') }}'
+        continue_on_timeout: true
+  - service: media_player.select_source
+    metadata: {}
+    data:
+      source: Nintendo Switch
+    target:
+      entity_id: media_player.master_bedroom_tv
+  mode: single
+  icon: mdi:remote-tv
+master_bedroom_tv_plex:
+  alias: Master Bedroom TV - Plex
+  sequence:
+  - if:
+    - condition: device
+      device_id: bc7126e259b0765e144923dba8a6677c
+      domain: media_player
+      entity_id: 855ff212ff93a4f3ed758ab61813c6dd
+      type: is_off
+    then:
+    - service: script.master_bedroom_tv_toggle
+      metadata: {}
+      data: {}
+      alias: Turn on TV
+    alias: Ensure TV is On
+  - alias: Ensure Apple TV is Active Input
+    if:
+    - condition: state
+      entity_id: sensor.master_bedroom_tv_active_app
+      state: Master Bedroom
+    then: []
+    else:
+    - service: media_player.select_source
+      metadata: {}
+      data:
+        source: Master Bedroom
+      target:
+        entity_id: media_player.master_bedroom_tv
+      alias: Set Apple TV as Source
+  - service: remote.send_command
+    target:
+      entity_id: remote.master_bedroom
+    data:
+      num_repeats: 1
+      command: wakeup
+    alias: Wake Apple TV
+  - service: media_player.select_source
+    metadata: {}
+    data:
+      source: Plex
+    target:
+      entity_id: media_player.master_bedroom
+    alias: Select Plex on Apple TV
+  mode: single
+  icon: mdi:remote-tv
+living_room_tv_toggle:
+  alias: Living Room TV - Toggle
+  sequence:
+  - if:
+    - condition: device
+      device_id: 6cf9c9299b7bf3a7506585b44396a398
+      domain: media_player
+      entity_id: 37c2ec13cedd16890edfebe0e070152a
+      type: is_off
+    then:
+    - service: remote.send_command
+      metadata: {}
+      data:
+        num_repeats: 1
+        delay_secs: 0.1
+        hold_secs: 0
+        command: wakeup
+      target:
+        entity_id: remote.living_room
+    else:
+    - service: remote.send_command
+      metadata: {}
+      data:
+        num_repeats: 1
+        delay_secs: 0.1
+        hold_secs: 3
+        command: suspend
+      target:
+        entity_id: remote.living_room
+    - service: media_player.turn_off
+      target:
+        entity_id: media_player.living_room_tv
+      data: {}
+  mode: single
+  icon: mdi:remote-tv
+master_bedroom_tv_apple_tv:
+  alias: Master Bedroom TV - Apple TV
+  sequence:
+  - if:
+    - condition: device
+      type: is_on
+      device_id: bc7126e259b0765e144923dba8a6677c
+      entity_id: 34a21b486daa09a2e51de01d57f2439d
+      domain: remote
+    then:
+    - if:
+      - condition: state
+        entity_id: sensor.master_bedroom_tv_active_app
+        state: Master Bedroom
+      then:
+      - service: remote.send_command
+        metadata: {}
+        data:
+          num_repeats: 1
+          delay_secs: 0.1
+          hold_secs: 0
+          command: pause
+        target:
+          entity_id: remote.master_bedroom
+      else:
+      - service: media_player.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: media_player.master_bedroom_tv
+      - wait_template: '{{ (states("media_player.master_bedroom_tv") == ''on'') }}'
+        continue_on_timeout: true
+  - service: media_player.select_source
+    metadata: {}
+    data:
+      source: Master Bedroom
+    target:
+      entity_id: media_player.master_bedroom_tv
+  mode: single
+  icon: mdi:remote-tv
+  description: ''
+living_room_tv_mute_unmute:
+  alias: Living Room TV - Mute/Unmute
+  sequence:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ state_attr("media_player.living_room_tv","is_volume_muted")
+          }}'
+      sequence:
+      - service: media_player.volume_mute
+        metadata: {}
+        data:
+          is_volume_muted: false
+        target:
+          entity_id: media_player.living_room_tv
+    - conditions:
+      - condition: not
+        conditions:
+        - condition: template
+          value_template: '{{ state_attr("media_player.living_room_tv","is_volume_muted")
+            }}'
+      sequence:
+      - service: media_player.volume_mute
+        metadata: {}
+        data:
+          is_volume_muted: true
+        target:
+          entity_id: media_player.living_room_tv
+  description: ''
+cb_watch_lights:
+  alias: Lights Full
+  sequence:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: office
+      sequence:
+      - action: light.turn_on
+        target:
+          entity_id:
+          - light.office
+        data:
+          brightness_pct: 100
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: kitchen
+      sequence:
+      - action: light.turn_on
+        data:
+          brightness_pct: 100
+        target:
+          entity_id:
+          - light.kitchen
+          - light.dining_room
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: master_bedroom
+      sequence:
+      - action: light.turn_on
+        data:
+          brightness_pct: 100
+        target:
+          entity_id: light.master_bedroom
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: violet_bedroom
+      sequence:
+      - action: light.turn_on
+        data:
+          brightness_pct: 100
+        target:
+          entity_id: light.violet_bedroom
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: living_room
+      sequence:
+      - action: light.turn_on
+        data:
+          brightness_pct: 100
+        target:
+          entity_id:
+          - light.living_room_lights
+          - light.play_area
+          - light.living_room_entry
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: garage
+      sequence:
+      - action: light.turn_on
+        data:
+          brightness_pct: 100
+        target:
+          entity_id: light.garage
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: backyard
+      sequence:
+      - action: light.turn_on
+        data:
+          brightness_pct: 100
+        target:
+          entity_id:
+          - light.backyard_flood
+          - light.gazebo
+  description: ''
+  icon: mdi:brightness-7
+toggle_fan:
+  alias: Increase Fan
+  sequence:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: office
+      sequence:
+      - choose:
+        - conditions:
+          - condition: state
+            entity_id: fan.office
+            state: 'on'
+          sequence:
+          - action: fan.increase_speed
+            metadata: {}
+            data: {}
+            target:
+              entity_id: fan.office
+        - conditions:
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: fan.office
+              state: 'on'
+          sequence:
+          - action: fan.turn_on
+            target:
+              entity_id:
+              - fan.office
+            data:
+              percentage: 50
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: master_bedroom
+      sequence:
+      - choose:
+        - conditions:
+          - condition: state
+            entity_id: fan.master_bedroom
+            state: 'on'
+          sequence:
+          - action: fan.increase_speed
+            metadata: {}
+            data: {}
+            target:
+              entity_id:
+              - fan.master_bedroom
+        - conditions:
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: fan.master_bedroom
+              state: 'on'
+          sequence:
+          - action: fan.turn_on
+            target:
+              entity_id:
+              - fan.master_bedroom
+            data:
+              percentage: 50
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: violet_bedroom
+      sequence:
+      - choose:
+        - conditions:
+          - condition: state
+            entity_id: fan.violet_bedroom
+            state: 'on'
+          sequence:
+          - action: fan.increase_speed
+            metadata: {}
+            data: {}
+            target:
+              entity_id:
+              - fan.violet_bedroom
+        - conditions:
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: fan.violet_bedroom
+              state: 'on'
+          sequence:
+          - action: fan.turn_on
+            target:
+              entity_id:
+              - fan.violet_bedroom
+            data:
+              percentage: 50
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: kitchen
+      sequence:
+      - choose:
+        - conditions:
+          - condition: state
+            entity_id: fan.dining_room
+            state: 'on'
+          sequence:
+          - action: fan.increase_speed
+            metadata: {}
+            data: {}
+            target:
+              entity_id:
+              - fan.dining_room
+        - conditions:
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: fan.dining_room
+              state: 'on'
+          sequence:
+          - action: fan.turn_on
+            target:
+              entity_id:
+              - fan.dining_room
+            data:
+              percentage: 50
+  description: ''
+  icon: mdi:fan-chevron-up
+decrease_fan:
+  alias: Decrease Fan
+  sequence:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: office
+      sequence:
+      - alias: Turn Down Fan
+        choose:
+        - conditions:
+          - condition: numeric_state
+            entity_id: fan.office
+            attribute: percentage
+            above: 25
+          sequence:
+          - action: fan.decrease_speed
+            target:
+              entity_id:
+              - fan.office
+            data: {}
+          alias: If above 25%, turn down
+        - conditions:
+          - condition: numeric_state
+            entity_id: fan.office
+            attribute: percentage
+            below: 50
+          sequence:
+          - action: fan.turn_off
+            target:
+              entity_id:
+              - fan.office
+            data: {}
+          alias: If below 50%, turn off
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: master_bedroom
+      sequence:
+      - alias: Turn Down Fan
+        choose:
+        - conditions:
+          - condition: numeric_state
+            entity_id: fan.master_bedroom
+            attribute: percentage
+            above: 25
+          sequence:
+          - action: fan.decrease_speed
+            target:
+              entity_id:
+              - fan.master_bedroom
+            data: {}
+          alias: If above 25%, turn down
+        - conditions:
+          - condition: numeric_state
+            entity_id: fan.master_bedroom
+            attribute: percentage
+            below: 50
+          sequence:
+          - action: fan.turn_off
+            target:
+              entity_id:
+              - fan.master_bedroom
+            data: {}
+          alias: If below 50%, turn off
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: violet_bedroom
+      sequence:
+      - alias: Turn Down Fan
+        choose:
+        - conditions:
+          - condition: numeric_state
+            entity_id: fan.violet_bedroom
+            attribute: percentage
+            above: 25
+          sequence:
+          - action: fan.decrease_speed
+            target:
+              entity_id:
+              - fan.violet_bedroom
+            data: {}
+          alias: If above 25%, turn down
+        - conditions:
+          - condition: numeric_state
+            entity_id: fan.violet_bedroom
+            attribute: percentage
+            below: 50
+          sequence:
+          - action: fan.turn_off
+            target:
+              entity_id:
+              - fan.violet_bedroom
+            data: {}
+          alias: If below 50%, turn off
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: kitchen
+      sequence:
+      - alias: Turn Down Fan
+        choose:
+        - conditions:
+          - condition: numeric_state
+            entity_id: fan.dining_room
+            attribute: percentage
+            above: 25
+          sequence:
+          - action: fan.decrease_speed
+            target:
+              entity_id:
+              - fan.dining_room
+            data: {}
+          alias: If above 25%, turn down
+        - conditions:
+          - condition: numeric_state
+            entity_id: fan.dining_room
+            attribute: percentage
+            below: 50
+          sequence:
+          - action: fan.turn_off
+            target:
+              entity_id:
+              - fan.dining_room
+            data: {}
+          alias: If below 50%, turn off
+  description: ''
+  icon: mdi:fan-chevron-down
+lights_dim:
+  alias: Lights Dim
+  sequence:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: office
+      sequence:
+      - action: light.turn_on
+        target:
+          entity_id:
+          - light.office
+        data:
+          brightness_pct: 25
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: kitchen
+      sequence:
+      - action: light.turn_on
+        data:
+          brightness_pct: 25
+        target:
+          entity_id:
+          - light.kitchen
+          - light.dining_room
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: master_bedroom
+      sequence:
+      - action: light.turn_on
+        data:
+          brightness_pct: 25
+        target:
+          entity_id: light.master_bedroom
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: violet_bedroom
+      sequence:
+      - action: light.turn_on
+        data:
+          brightness_pct: 25
+        target:
+          entity_id: light.violet_bedroom
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: living_room
+      sequence:
+      - action: light.turn_on
+        data:
+          brightness_pct: 25
+        target:
+          entity_id:
+          - light.living_room_lights
+          - light.play_area
+          - light.living_room_entry
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: garage
+      sequence:
+      - action: light.turn_on
+        data:
+          brightness_pct: 100
+        target:
+          entity_id: light.garage
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: backyard
+      sequence:
+      - action: light.turn_on
+        data:
+          brightness_pct: 100
+        target:
+          entity_id:
+          - light.gazebo
+      - action: light.turn_off
+        target:
+          entity_id:
+          - light.backyard_flood
+        data: {}
+  description: ''
+  icon: mdi:brightness-5
+lights_off:
+  alias: Lights Off
+  sequence:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: office
+      sequence:
+      - action: light.turn_off
+        target:
+          entity_id:
+          - light.office
+        data: {}
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: kitchen
+      sequence:
+      - action: light.turn_off
+        target:
+          entity_id:
+          - light.kitchen
+          - light.dining_room
+        data: {}
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: master_bedroom
+      sequence:
+      - action: light.turn_off
+        target:
+          entity_id:
+          - light.master_bedroom
+        data: {}
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: violet_bedroom
+      sequence:
+      - action: light.turn_off
+        target:
+          entity_id:
+          - light.violet_bedroom
+        data: {}
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: living_room
+      sequence:
+      - action: light.turn_off
+        target:
+          entity_id:
+          - light.living_room_lights
+          - light.play_area
+          - light.living_room_entry
+        data: {}
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: garage
+      sequence:
+      - action: light.turn_off
+        target:
+          entity_id:
+          - light.garage
+        data: {}
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: backyard
+      sequence:
+      - action: light.turn_off
+        target:
+          entity_id:
+          - light.backyard_flood
+          - light.gazebo
+        data: {}
+  description: ''
+  icon: mdi:lightbulb-off
+bathroom_fan_toggle:
+  alias: Bathroom Fan Toggle
+  sequence:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.christian_s_watch_ble
+        state: master_bedroom
+      sequence:
+      - action: fan.toggle
+        target:
+          entity_id: fan.master_bathroom
+        data: {}
+    - conditions:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: sensor.christian_s_watch_ble
+          state: master_bedroom
+      sequence:
+      - action: fan.toggle
+        target:
+          entity_id:
+          - fan.guest_bathroom
+        data: {}
+  description: ''
+  icon: mdi:fan
