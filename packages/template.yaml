@@ -1,0 +1,693 @@
+template:
+  - sensor:
+      - name: "Trash Phone Notification Time"
+        device_class: timestamp
+        state: >-
+          {{ states('sensor.trash') | as_datetime - timedelta(hours=14) }}
+      - name: "Trash Dashboard Notification Time"
+        device_class: timestamp
+        state: >-
+          {{ states('sensor.trash') | as_datetime - timedelta(hours=24) }}
+      - name: "Night Mode Toggle"
+        state: >-
+          {% if is_state("sun.sun","above_horizon") %}
+          Unavailable
+          {% elif is_state("light.front_door","off") %}
+          Available
+          {% elif is_state("light.living_room_entry","off") %}
+          Available
+          {% elif is_state("light.play_area","on") %}
+          Available
+          {% elif is_state("light.living_room_lights","on") %}
+          Available
+          {% elif is_state("light.front_hallway","on") %}
+          Available
+          {% elif is_state("light.dining_room","on") %}
+          Available
+          {% elif is_state("fan.dining_room","on") %}
+          Available
+          {% else %}
+          Unavailable
+          {% endif %}
+
+      - name: "Sprinkler State"
+        state: >
+            {% if is_state("switch.grass_1_zone","on") %}
+              on
+            {% elif is_state("switch.grass_2_zone","on") %}
+              on
+            {% elif is_state("switch.planter_zone","on") %}
+              on
+            {% else %}
+              off
+            {% endif %}
+        icon: mdi:sprinkler
+      - name: "Doorbell State"
+        state: >
+            {% if is_state("automation.doorbell_chime","on") %}
+              On
+            {% else %}
+              Silent
+            {% endif %}
+        icon: >
+            {% if is_state("automation.doorbell_chime","on") %}
+              mdi:bell-check
+            {% else %}
+              mdi:bell-cancel
+            {% endif %}
+      - name: "Front Door State"
+        state: >
+            {% if is_state("binary_sensor.door_open_frontdoor","on") %}
+              Open
+            {% elif is_state("lock.door_lock_frontdoor","unlocked") %}
+              Unlocked
+            {% else %}
+              Locked
+            {% endif %}
+        icon: >
+            {% if is_state("binary_sensor.door_open_frontdoor","on") %}
+              mdi:door-open
+            {% elif is_state("lock.door_lock_frontdoor","unlocked") %}
+              mdi:door-closed
+            {% else %}
+              mdi:door-closed-lock
+            {% endif %}
+      - name: "Dryer State"
+        state: >
+            {% if is_state("binary_sensor.dryer_dry_completed","on") %}
+              Finished
+            {% else %}
+              {% if is_state("sensor.dryer","on") %}
+                {{ states("sensor.dryer_time_display") }}
+              {% else %}
+                Off
+              {% endif %}
+            {% endif %}
+        icon: >
+            {% if is_state("binary_sensor.dryer_dry_completed","on") %}
+              mdi:tumble-dryer-alert
+            {% else %}
+              {% if is_state("sensor.dryer","on") %}
+                mdi:tumble-dryer
+              {% else %}
+                mdi:tumble-dryer-off
+              {% endif %}
+            {% endif %}
+      - name: "Washer State"
+        state: >
+            {% if is_state("binary_sensor.washer_wash_completed","on") %}
+              Finished
+            {% else %}
+              {% if is_state("sensor.washer","on") %}
+                {{ states("sensor.washer_time_display") }}
+              {% else %}
+                Off
+              {% endif %}
+            {% endif %}
+        icon: >
+            {% if is_state("binary_sensor.washer_wash_completed","on") %}
+              mdi:washing-machine-alert
+            {% else %}
+              {% if is_state("sensor.washer","on") %}
+                mdi:washing-machine
+              {% else %}
+                mdi:washing-machine-off
+              {% endif %}
+            {% endif %}
+      - name: Living Room Apple TV Source
+        state: >
+            {% if is_state_attr("media_player.living_room","app_id","com.plexapp.plex") %}
+                Plex
+            {% elif is_state_attr("media_player.living_room","app_id","com.collegehumor.chdropout") %}
+                Dropout
+            {% elif is_state_attr("media_player.living_room","app_id","com.spotify.client") %}
+                Spotify
+            {% elif is_state_attr("media_player.living_room","app_id","com.formula1.ott") %}
+                F1 TV
+            {% elif is_state_attr("media_player.living_room","app_id","com.amazon.aiv.AIVApp") %}
+                Prime Video
+            {% elif is_state_attr("media_player.living_room","app_id","com.google.ios.youtube") %}
+                YouTube
+            {% elif is_state_attr("media_player.living_room","app_id","com.nbcuni.com.nbcsports.liveextra") %}
+                NBC Sports
+            {% elif is_state_attr("media_player.living_room","app_id","com.uie.foxsports") %}
+                FOX Sports
+            {% elif is_state_attr("media_player.living_room","app_id","H443NM7F8H.CBSSportsApp") %}
+                CBS Sports
+            {% endif %}
+      - name: Master Bedroom Apple TV Source
+        state: >
+            {% if is_state_attr("media_player.master_bedroom","app_id","com.plexapp.plex") %}
+                Plex
+            {% elif is_state_attr("media_player.master_bedroom","app_id","com.collegehumor.chdropout") %}
+                Dropout
+            {% elif is_state_attr("media_player.master_bedroom","app_id","com.spotify.client") %}
+                Spotify
+            {% elif is_state_attr("media_player.master_bedroom","app_id","com.formula1.ott") %}
+                F1 TV
+            {% elif is_state_attr("media_player.master_bedroom","app_id","com.amazon.aiv.AIVApp") %}
+                Prime Video
+            {% elif is_state_attr("media_player.master_bedroom","app_id","com.google.ios.youtube") %}
+                YouTube
+            {% elif is_state_attr("media_player.master_bedroom","app_id","com.nbcuni.com.nbcsports.liveextra") %}
+                NBC Sports
+            {% elif is_state_attr("media_player.master_bedroom","app_id","com.uie.foxsports") %}
+                FOX Sports
+            {% elif is_state_attr("media_player.master_bedroom","app_id","H443NM7F8H.CBSSportsApp") %}
+                CBS Sports
+            {% endif %}
+      - name: Living Room TV Source
+        state: >
+          {% if is_state_attr("media_player.living_room_tv","source","Apple") %}
+            Apple TV
+          {% elif is_state_attr("media_player.living_room_tv","source","Nintendo Switch") %}
+            Nintendo Switch
+          {% else %}
+            Standby
+          {% endif %}
+        icon: >
+          {% if is_state_attr("media_player.living_room_tv","source","Apple") %}
+            mdi:apple
+          {% elif is_state_attr("media_player.living_room_tv","source","Nintendo Switch") %}
+            mdi:nintendo-switch
+          {% else %}
+            mdi:television-off
+          {% endif %}
+      - name: Living Room TV State
+        state: >
+          {% if is_state("sensor.living_room_tv_source","Apple TV") %}
+            {% if is_state_attr("media_player.master_bedroom","app_name","unknown") %}
+              Standby
+            {% else %}
+              {{ state_attr("media_player.living_room","app_name") }}
+            {% endif %}
+          {% elif is_state("sensor.living_room_tv_source","Nintendo Switch") %}
+            Nintendo Switch
+          {% else %}
+            Standby
+          {% endif %}
+        icon: >
+          {% if is_state("sensor.living_room_tv_source","Apple TV") %}
+            {% if is_state_attr("media_player.living_room","app_name","Plex") %}
+                mdi:plex
+            {% elif is_state_attr("media_player.living_room","app_name","Spotify") %}
+                mdi:spotify
+            {% elif is_state_attr("media_player.living_room","app_name","Jellyfin") %}
+                mdi:jellyfish
+            {% elif is_state_attr("media_player.living_room","app_name","Infuse") %}
+                mdi:video
+            {% elif is_state_attr("media_player.living_room","app_name","Twitch") %}
+                mdi:twitch
+            {% elif is_state_attr("media_player.living_room","app_name","VLC") %}
+                mdi:vlc
+            {% elif is_state_attr("media_player.living_room","app_name","Settings") %}
+                mdi:cog
+            {% elif is_state_attr("media_player.living_room","app_name","Moonlight") %}
+                mdi:controller
+            {% elif is_state_attr("media_player.living_room","app_name","Netflix") %}
+                mdi:netflix
+            {% elif is_state_attr("media_player.living_room","app_name","F1 TV") %}
+                phu:f1
+            {% elif is_state_attr("media_player.living_room","app_name","Prime Video") %}
+                phu:prime-video
+            {% elif is_state_attr("media_player.living_room","app_name","YouTube") %}
+                mdi:youtube
+            {% elif is_state_attr("media_player.living_room","app_name","CBS Sports") %}
+                phu:cbs
+            {% elif is_state_attr("media_player.living_room","app_name","Disney+") %}
+                phu:disney-plus
+            {% elif is_state_attr("media_player.living_room","app_name","FOX Sports") %}
+                phu:fox
+            {% elif is_state_attr("media_player.living_room","app_name","Dropout") %}
+                mdi:alpha-d-box
+            {% elif is_state_attr("media_player.living_room","app_name","ESPN") %}
+                phu:espn
+            {% elif is_state_attr("media_player.living_room","app_name","NBC Sports") %}
+                phu:nbc
+            {% elif is_state_attr("media_player.living_room","app_name","NFL") %}
+                mdi:football-helmet
+            {% else %}
+                mdi:apple
+            {% endif %}
+          {% elif is_state("sensor.living_room_tv_source","Nintendo Switch") %}
+            mdi:nintendo-switch
+          {% else %}
+            mdi:power-standby
+          {% endif %}
+      - name: Master Bedroom TV Source
+        state: >
+          {% if is_state_attr("media_player.master_bedroom_tv","source","Master Bedroom") %}
+            Apple TV
+          {% elif is_state_attr("media_player.master_bedroom_tv","source","Nintendo Switch") %}
+            Nintendo Switch
+          {% else %}
+            Standby
+          {% endif %}
+        icon: >
+          {% if is_state_attr("media_player.master_bedroom_tv","source","Master Bedroom") %}
+            mdi:apple
+          {% elif is_state_attr("media_player.master_bedroom_tv","source","Nintendo Switch") %}
+            mdi:nintendo-switch
+          {% else %}
+            mdi:television-off
+          {% endif %}
+      - name: Master Bedroom TV State
+        state: >
+          {% if is_state("sensor.master_bedroom_tv_source","Apple TV") %}
+            {% if is_state_attr("media_player.master_bedroom","app_name","unknown") %}
+              Standby
+            {% else %}
+              {{ state_attr("media_player.master_bedroom","app_name") }}
+            {% endif %}
+          {% elif is_state("sensor.master_bedroom_tv_source","Nintendo Switch") %}
+            Nintendo Switch
+          {% else %}
+            Standby
+          {% endif %}
+        icon: >
+          {% if is_state("sensor.master_bedroom_tv_source","Apple TV") %}
+            {% if is_state_attr("media_player.master_bedroom","app_name","Plex") %}
+              mdi:plex
+            {% elif is_state_attr("media_player.master_bedroom","app_name","Spotify") %}
+              mdi:spotify
+            {% elif is_state_attr("media_player.master_bedroom","app_name","Moonlight") %}
+              mdi:controller
+            {% elif is_state_attr("media_player.master_bedroom","app_name","Jellyfin") %}
+              mdi:jellyfish
+            {% elif is_state_attr("media_player.master_bedroom","app_name","Infuse") %}
+              mdi:video
+            {% elif is_state_attr("media_player.master_bedroom","app_name","Twitch") %}
+              mdi:twitch
+            {% elif is_state_attr("media_player.master_bedroom","app_name","VLC") %}
+              mdi:vlc
+            {% elif is_state_attr("media_player.master_bedroom","app_name","Settings") %}
+              mdi:cog
+            {% elif is_state_attr("media_player.master_bedroom","app_name","Netflix") %}
+              mdi:netflix
+            {% elif is_state_attr("media_player.master_bedroom","app_name","F1 TV") %}
+              phu:f1
+            {% elif is_state_attr("media_player.master_bedroom","app_name","Prime Video") %}
+              phu:prime-video
+            {% elif is_state_attr("media_player.master_bedroom","app_name","YouTube") %}
+              mdi:youtube
+            {% elif is_state_attr("media_player.master_bedroom","app_name","CBS Sports") %}
+              phu:cbs
+            {% elif is_state_attr("media_player.master_bedroom","app_name","Disney+") %}
+              phu:disney-plus
+            {% elif is_state_attr("media_player.master_bedroom","app_name","FOX Sports") %}
+              phu:fox
+            {% elif is_state_attr("media_player.master_bedroom","app_name","Dropout") %}
+              mdi:alpha-d-box
+            {% elif is_state_attr("media_player.master_bedroom","app_name","ESPN") %}
+              phu:espn
+            {% elif is_state_attr("media_player.master_bedroom","app_name","NBC Sports") %}
+              phu:nbc
+            {% elif is_state_attr("media_player.master_bedroom","app_name","NFL") %}
+              mdi:football-helmet
+            {% else %}
+              mdi:apple
+            {% endif %}
+          {% elif is_state("sensor.master_bedroom_tv_source","Nintendo Switch") %}
+            mdi:nintendo-switch
+          {% else %}
+            mdi:power-standby
+          {% endif %}
+      - name: Kelly Carley TV State
+        state: >
+          {% if is_state("media_player.bedroom_3_tv","standby") %}
+            Standby
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","Roku Dynamic Menu") %}
+            {{ state_attr("media_player.bedroom_3_tv","source") }}
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","Hulu") %}
+            {{ state_attr("media_player.bedroom_3_tv","source") }}
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","Plex - Free Movies & TV") %}
+            Plex
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","Netflix") %}
+            {{ state_attr("media_player.bedroom_3_tv","source") }}
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","F1 TV") %}
+            {{ state_attr("media_player.bedroom_3_tv","source") }}
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","Prime Video") %}
+            {{ state_attr("media_player.bedroom_3_tv","source") }}
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","YouTube") %}
+            {{ state_attr("media_player.bedroom_3_tv","source") }}
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","CBS Sports Stream & Watch Live") %}
+            CBS Sports
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","Disney Plus") %}
+            {{ state_attr("media_player.bedroom_3_tv","source") }}
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","FOX Sports") %}
+            {{ state_attr("media_player.bedroom_3_tv","source") }}
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","Dropout") %}
+            {{ state_attr("media_player.bedroom_3_tv","source") }}
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","ESPN") %}
+            {{ state_attr("media_player.bedroom_3_tv","source") }}
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","NBC Sports") %}
+            {{ state_attr("media_player.bedroom_3_tv","source") }}
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","NFL") %}
+            {{ state_attr("media_player.bedroom_3_tv","source") }}
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","Nintendo Switch") %}
+            {{ state_attr("media_player.bedroom_3_tv","source") }}
+          {% else %}
+            Off
+          {% endif %}
+        icon: >
+          {% if is_state("media_player.bedroom_3_tv","standby") %}
+            mdi:power-standby
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","Roku Dynamic Menu") %}
+            mdi:home-variant
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","Hulu") %}
+            mdi:hulu
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","Plex - Free Movies & TV") %}
+            mdi:plex
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","Netflix") %}
+            mdi:netflix
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","F1 TV") %}
+            phu:f1
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","Prime Video") %}
+            phu:prime-video
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","YouTube") %}
+            mdi:youtube
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","CBS Sports Stream & Watch Live") %}
+            phu:cbs
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","Disney Plus") %}
+            phu:disney-plus
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","FOX Sports") %}
+            phu:fox
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","Dropout") %}
+            mdi:alpha-d-box
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","ESPN") %}
+            phu:espn
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","NBC Sports") %}
+            phu:nbc
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","NFL") %}
+            mdi:football-helmet
+          {% elif is_state_attr("media_player.bedroom_3_tv","source","Nintendo Switch") %}
+            mdi:nintendo-switch
+          {% else %}
+            mdi:television-off
+          {% endif %}
+      - name: Office TV State
+        state: >
+          {% if is_state("media_player.office_tv","standby") %}
+            Standby
+          {% elif is_state_attr("media_player.office_tv","source","Roku Dynamic Menu") %}
+            {{ state_attr("media_player.office_tv","source") }}
+          {% elif is_state_attr("media_player.office_tv","source","Plex - Free Movies & TV") %}
+            Plex
+          {% elif is_state_attr("media_player.office_tv","source","Netflix") %}
+            {{ state_attr("media_player.office_tv","source") }}
+          {% elif is_state_attr("media_player.office_tv","source","F1 TV") %}
+            {{ state_attr("media_player.office_tv","source") }}
+          {% elif is_state_attr("media_player.office_tv","source","Prime Video") %}
+            {{ state_attr("media_player.office_tv","source") }}
+          {% elif is_state_attr("media_player.office_tv","source","YouTube") %}
+            {{ state_attr("media_player.office_tv","source") }}
+          {% elif is_state_attr("media_player.office_tv","source","CBS Sports Stream & Watch Live") %}
+            CBS Sports
+          {% elif is_state_attr("media_player.office_tv","source","Disney Plus") %}
+            {{ state_attr("media_player.office_tv","source") }}
+          {% elif is_state_attr("media_player.office_tv","source","FOX Sports") %}
+            {{ state_attr("media_player.office_tv","source") }}
+          {% elif is_state_attr("media_player.office_tv","source","Dropout") %}
+            {{ state_attr("media_player.office_tv","source") }}
+          {% elif is_state_attr("media_player.office_tv","source","ESPN") %}
+            {{ state_attr("media_player.office_tv","source") }}
+          {% elif is_state_attr("media_player.office_tv","source","NBC Sports") %}
+            {{ state_attr("media_player.office_tv","source") }}
+          {% elif is_state_attr("media_player.office_tv","source","NFL") %}
+            {{ state_attr("media_player.office_tv","source") }}
+          {% elif is_state_attr("media_player.office_tv","source","HDMI 1") %}
+            Computer
+          {% else %}
+            Off
+          {% endif %}
+        icon: >
+          {% if is_state("media_player.office_tv","standby") %}
+            mdi:power-standby
+          {% elif is_state_attr("media_player.office_tv","source","Roku Dynamic Menu") %}
+            mdi:home-variant
+          {% elif is_state_attr("media_player.office_tv","source","Plex - Free Movies & TV") %}
+            mdi:plex
+          {% elif is_state_attr("media_player.office_tv","source","Netflix") %}
+            mdi:netflix
+          {% elif is_state_attr("media_player.office_tv","source","F1 TV") %}
+            phu:f1
+          {% elif is_state_attr("media_player.office_tv","source","Prime Video") %}
+            phu:prime-video
+          {% elif is_state_attr("media_player.office_tv","source","YouTube") %}
+            mdi:youtube
+          {% elif is_state_attr("media_player.office_tv","source","CBS Sports Stream & Watch Live") %}
+            phu:cbs
+          {% elif is_state_attr("media_player.office_tv","source","Disney Plus") %}
+            phu:disney-plus
+          {% elif is_state_attr("media_player.office_tv","source","FOX Sports") %}
+            phu:fox
+          {% elif is_state_attr("media_player.office_tv","source","Dropout") %}
+            mdi:alpha-d-box
+          {% elif is_state_attr("media_player.office_tv","source","ESPN") %}
+            phu:espn
+          {% elif is_state_attr("media_player.office_tv","source","NBC Sports") %}
+            phu:nbc
+          {% elif is_state_attr("media_player.office_tv","source","NFL") %}
+            mdi:football-helmet
+          {% elif is_state_attr("media_player.office_tv","source","HDMI 1") %}
+            mdi:controller
+          {% else %}
+            mdi:television-off
+          {% endif %}
+      - name: Dining Room TV State
+        state: >
+          {% if is_state("media_player.dining_room_tv","standby") %}
+            Standby
+          {% elif is_state_attr("media_player.dining_room_tv","source","Roku Dynamic Menu") %}
+            {{ state_attr("media_player.dining_room_tv","source") }}
+          {% elif is_state_attr("media_player.dining_room_tv","source","Plex - Free Movies & TV") %}
+            Plex
+          {% elif is_state_attr("media_player.dining_room_tv","source","Netflix") %}
+            {{ state_attr("media_player.dining_room_tv","source") }}
+          {% elif is_state_attr("media_player.dining_room_tv","source","F1 TV") %}
+            {{ state_attr("media_player.dining_room_tv","source") }}
+          {% elif is_state_attr("media_player.dining_room_tv","source","Prime Video") %}
+            {{ state_attr("media_player.dining_room_tv","source") }}
+          {% elif is_state_attr("media_player.dining_room_tv","source","YouTube") %}
+            {{ state_attr("media_player.dining_room_tv","source") }}
+          {% elif is_state_attr("media_player.dining_room_tv","source","CBS Sports Stream & Watch Live") %}
+            CBS Sports
+          {% elif is_state_attr("media_player.dining_room_tv","source","Disney Plus") %}
+            {{ state_attr("media_player.dining_room_tv","source") }}
+          {% elif is_state_attr("media_player.dining_room_tv","source","FOX Sports") %}
+            {{ state_attr("media_player.dining_room_tv","source") }}
+          {% elif is_state_attr("media_player.dining_room_tv","source","Dropout") %}
+            {{ state_attr("media_player.dining_room_tv","source") }}
+          {% elif is_state_attr("media_player.dining_room_tv","source","ESPN") %}
+            {{ state_attr("media_player.dining_room_tv","source") }}
+          {% elif is_state_attr("media_player.dining_room_tv","source","NBC Sports") %}
+            {{ state_attr("media_player.dining_room_tv","source") }}
+          {% elif is_state_attr("media_player.dining_room_tv","source","NFL") %}
+            {{ state_attr("media_player.dining_room_tv","source") }}
+          {% else %}
+            Off
+          {% endif %}
+        icon: >
+          {% if is_state("media_player.dining_room_tv","standby") %}
+            mdi:power-standby
+          {% elif is_state_attr("media_player.dining_room_tv","source","Roku Dynamic Menu") %}
+            mdi:home-variant
+          {% elif is_state_attr("media_player.dining_room_tv","source","Plex - Free Movies & TV") %}
+            mdi:plex
+          {% elif is_state_attr("media_player.dining_room_tv","source","Netflix") %}
+            mdi:netflix
+          {% elif is_state_attr("media_player.dining_room_tv","source","F1 TV") %}
+            phu:f1
+          {% elif is_state_attr("media_player.dining_room_tv","source","Prime Video") %}
+            phu:prime-video
+          {% elif is_state_attr("media_player.dining_room_tv","source","YouTube") %}
+            mdi:youtube
+          {% elif is_state_attr("media_player.dining_room_tv","source","CBS Sports Stream & Watch Live") %}
+            phu:cbs
+          {% elif is_state_attr("media_player.dining_room_tv","source","Disney Plus") %}
+            phu:disney-plus
+          {% elif is_state_attr("media_player.dining_room_tv","source","FOX Sports") %}
+            phu:fox
+          {% elif is_state_attr("media_player.dining_room_tv","source","Dropout") %}
+            mdi:alpha-d-box
+          {% elif is_state_attr("media_player.dining_room_tv","source","ESPN") %}
+            phu:espn
+          {% elif is_state_attr("media_player.dining_room_tv","source","NBC Sports") %}
+            phu:nbc
+          {% elif is_state_attr("media_player.dining_room_tv","source","NFL") %}
+            mdi:football-helmet
+          {% else %}
+            mdi:television-off
+          {% endif %}
+      - name: Garage TV State
+        state: >
+          {% if is_state("media_player.garage_tv","standby") %}
+            Standby
+          {% elif is_state_attr("media_player.garage_tv","source","Roku Dynamic Menu") %}
+            {{ state_attr("media_player.garage_tv","source") }}
+          {% elif is_state_attr("media_player.garage_tv","source","Plex - Free Movies & TV") %}
+            Plex
+          {% elif is_state_attr("media_player.garage_tv","source","Netflix") %}
+            {{ state_attr("media_player.garage_tv","source") }}
+          {% elif is_state_attr("media_player.garage_tv","source","F1 TV") %}
+            {{ state_attr("media_player.garage_tv","source") }}
+          {% elif is_state_attr("media_player.garage_tv","source","Prime Video") %}
+            {{ state_attr("media_player.garage_tv","source") }}
+          {% elif is_state_attr("media_player.garage_tv","source","YouTube") %}
+            {{ state_attr("media_player.garage_tv","source") }}
+          {% elif is_state_attr("media_player.garage_tv","source","CBS Sports Stream & Watch Live") %}
+            CBS Sports
+          {% elif is_state_attr("media_player.garage_tv","source","Disney Plus") %}
+            {{ state_attr("media_player.garage_tv","source") }}
+          {% elif is_state_attr("media_player.garage_tv","source","FOX Sports") %}
+            {{ state_attr("media_player.garage_tv","source") }}
+          {% elif is_state_attr("media_player.garage_tv","source","Dropout") %}
+            {{ state_attr("media_player.garage_tv","source") }}
+          {% elif is_state_attr("media_player.garage_tv","source","ESPN") %}
+            {{ state_attr("media_player.garage_tv","source") }}
+          {% elif is_state_attr("media_player.garage_tv","source","NBC Sports") %}
+            {{ state_attr("media_player.garage_tv","source") }}
+          {% elif is_state_attr("media_player.garage_tv","source","NFL") %}
+            {{ state_attr("media_player.garage_tv","source") }}
+          {% else %}
+            Off
+          {% endif %}
+        icon: >
+          {% if is_state("media_player.garage_tv","standby") %}
+            mdi:power-standby
+          {% elif is_state_attr("media_player.garage_tv","source","Roku Dynamic Menu") %}
+            mdi:home-variant
+          {% elif is_state_attr("media_player.garage_tv","source","Plex - Free Movies & TV") %}
+            mdi:plex
+          {% elif is_state_attr("media_player.garage_tv","source","Netflix") %}
+            mdi:netflix
+          {% elif is_state_attr("media_player.garage_tv","source","F1 TV") %}
+            phu:f1
+          {% elif is_state_attr("media_player.garage_tv","source","Prime Video") %}
+            phu:prime-video
+          {% elif is_state_attr("media_player.garage_tv","source","YouTube") %}
+            mdi:youtube
+          {% elif is_state_attr("media_player.garage_tv","source","CBS Sports Stream & Watch Live") %}
+            phu:cbs
+          {% elif is_state_attr("media_player.garage_tv","source","Disney Plus") %}
+            phu:disney-plus
+          {% elif is_state_attr("media_player.garage_tv","source","FOX Sports") %}
+            phu:fox
+          {% elif is_state_attr("media_player.garage_tv","source","Dropout") %}
+            mdi:alpha-d-box
+          {% elif is_state_attr("media_player.garage_tv","source","ESPN") %}
+            phu:espn
+          {% elif is_state_attr("media_player.garage_tv","source","NBC Sports") %}
+            phu:nbc
+          {% elif is_state_attr("media_player.garage_tv","source","NFL") %}
+            mdi:football-helmet
+          {% else %}
+            mdi:television-off
+          {% endif %}
+      - name: "Deliveries Summary"
+        state: >
+          {# Deliveries Sentence #}
+            {% macro deliveries_sentence() -%}
+                  {%- if states("sensor.mail_usps_mail")|int(0) == 0 -%}
+                    No
+                  {%- else -%}
+                    {{states("sensor.mail_usps_mail")|int(0)}}
+                  {%- endif -%}
+                {{' '}} 
+                  {%- if states("sensor.mail_usps_mail")|int(0) <= 1 -%}
+                    pieces of mail
+                  {%- else -%}
+                    pieces of mail
+                  {%- endif -%}
+                {{' '}}will be delivered.{{' '}} 
+                  {%- if states("sensor.mail_usps_delivering")|int(0) == 0 -%}
+                    No
+                  {%- else -%}
+                    {{states("sensor.mail_usps_delivering")|int(0)}}
+                  {%- endif -%}
+                {{' '}} 
+                  {%- if states("sensor.mail_usps_delivering")|int(0) == 1 -%}
+                    USPS package is
+                  {%- else -%}
+                    USPS packages are
+                  {%- endif -%}
+                {{' '}}in transit.{{' '}}
+                  {%- if states("sensor.mail_fedex_delivering")|int(0) == 0 -%}
+                    No
+                  {%- else -%}
+                    {{states("sensor.mail_fedex_delivering")|int(0)}}
+                  {%- endif -%}
+                {{' '}} 
+                  {%- if states("sensor.mail_fedex_delivering")|int(0) == 1 -%}
+                    FedEx package is
+                  {%- else -%}
+                    Fedex packages are
+                  {%- endif -%}
+                {{' '}}in transit.{{' '}}
+                {%- if states("sensor.mail_ups_delivering")|int(0) == 0 -%}
+                    No
+                  {%- else -%}
+                    {{states("sensor.mail_ups_delivering")|int(0)}}
+                  {%- endif -%}
+                {{' '}} 
+                  {%- if states("sensor.mail_ups_delivering")|int(0) == 1 -%}
+                    UPS package is
+                  {%- else -%}
+                    UPS packages are
+                  {%- endif -%}
+                {{' '}}in transit.{{' '}}
+                {%- if states("sensor.mail_amazon_packages")|int(0) == 0 -%}
+                    No
+                  {%- else -%}
+                    {{states("sensor.mail_amazon_packages")|int(0)}}
+                  {%- endif -%}
+                {{' '}} 
+                  {%- if states("sensor.mail_amazon_packages")|int(0) == 1 -%}
+                    Amazon package is
+                  {%- else -%}
+                    Amazon packages are
+                  {%- endif -%}
+                {{' '}}in transit.{{' '}}
+            {%- endmacro %}
+          {{deliveries_sentence()}}
+      - name: OPNsense Uptime
+        state: >
+          {% if is_state("sensor.freebsd_router_uptime","Unknown") %}
+          Offline
+          {% else %}
+            {% set time = states("sensor.freebsd_router_uptime") | int %}
+            {% set minutes = ((time % 3600) / 60) | int %}
+            {% set hours = ((time % 86400) / 3600) | int %}
+            {% set days = (time / 86400) | int %}
+            {%- if time < 60 -%}
+              Less than a minute
+            {%- else -%}
+              {%- if days > 0 -%}
+                {%- if days == 1 -%}
+                  1 day
+                {%- else -%}
+                  {{ days }} days
+                {%- endif -%}
+              {%- endif -%}
+              {%- if hours > 0 -%}
+                {%- if days > 0 -%}
+                  {{ ', ' }}
+                {%- endif -%}
+                {%- if hours == 1 -%}
+                  1 hour
+                {%- else -%}
+                  {{ hours }} hours
+                {%- endif -%}
+              {%- endif -%}
+              {%- if minutes > 0 -%}
+                {%- if days > 0 or hours > 0 -%}
+                  {{ ', ' }}
+                {%- endif -%}
+                {%- if minutes == 1 -%}
+                  1 minute
+                {%- else -%}
+                  {{ minutes }} minutes
+                {%- endif -%}
+              {%- endif -%}
+            {%- endif -%}
+          {% endif %}

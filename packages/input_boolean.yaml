@@ -1,0 +1,13 @@
+input_boolean:
+  garage_door_feedback:
+    name: Feedback while garage door is moving
+    icon: mdi:garage
+  mail_delivered:
+    name: Mail Delivered
+    icon: mdi:mailbox-open
+  mail_picked_up:
+    name: Mail Picked Up
+    icon: mdi:mailbox
+  outgoing_mail:
+    name: Outgoing Mail
+    icon: mdi:mail

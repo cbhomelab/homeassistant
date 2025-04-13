@@ -1,0 +1,87 @@
+homekit:
+  - name: HASS Bridge
+    mode: bridge
+    port: 21062
+    filter:
+      include_entities:
+        - light.backyard_flood_lights
+        - light.backyard_string_lights
+        - binary_sensor.door_open_frontdoor
+        - cover.garage_door
+      include_entity_globs:
+        - binary_sensor.*_open
+      exclude_entities:
+        - binary_sensor.mailbox_open
+        - binary_sensor.garage_door_open
+        - binary_sensor.3d_printer_door_open
+  - name: Doorbell Bridge
+    mode: accessory
+    port: 21063
+    filter:
+      include_entities:
+        - camera.thunderdome_doorbell
+    entity_config:
+      camera.doorbell:
+        support_audio: True
+        linked_motion_sensor: binary_sensor.doorbell_motion
+        linked_doorbell_sensor: binary_sensor.doorbell_button_pressed
+  - name: Front Door Bridge
+    mode: accessory
+    port: 21064
+    filter:
+      include_entities:
+        - camera.thunderdome_front_door
+    entity_config:
+      camera.front_door:
+        support_audio: True
+        linked_motion_sensor: binary_sensor.front_door_motion
+  - name: Front Yard Bridge
+    mode: accessory
+    port: 21065
+    filter:
+      include_entities:
+        - camera.thunderdome_frontyard
+    entity_config:
+      camera.frontyard:
+        support_audio: True
+        linked_motion_sensor: binary_sensor.front_yard_motion
+  - name: Back Yard Bridge
+    mode: accessory
+    port: 21066
+    filter:
+      include_entities:
+        - camera.thunderdome_backyard
+    entity_config:
+      camera.backyard:
+        support_audio: True
+        linked_motion_sensor: binary_sensor.back_yard_motion
+  - name: Garage Bridge
+    mode: accessory
+    port: 21067
+    filter:
+      include_entities:
+        - camera.thunderdome_garage
+    entity_config:
+      camera.garage:
+        support_audio: True
+        linked_motion_sensor: binary_sensor.garage_motion
+  - name: Violet Bedroom Bridge
+    mode: accessory
+    port: 21068
+    filter:
+      include_entities:
+        - camera.thunderdome_violet_s_bedroom
+    entity_config:
+      camera.violets_bedroom:
+        support_audio: True
+        linked_motion_sensor: binary_sensor.violet_bedroom_motion
+  - name: Baby Monitor
+    mode: accessory
+    port: 21069
+    filter:
+      include_entities:
+        - camera.thunderdome_baby_monitor
+    entity_config:
+      camera.baby_monitor:
+        support_audio: True
+        linked_motion_sensor: binary_sensor.baby_monitor_motion

@@ -1,0 +1,37 @@
+pyscript:
+    apps:
+        fan_humidity:
+        # humidity_id -  humidity rate of change (sensor domain)
+        # fan_id - fan entity (fan or switch domain)
+        # timer_id - timer helper
+        # duration_id - input_number helper for user duration input
+        #- name: 
+        #  humidity_id: 
+        #  fan_id: 
+        #  timer_id: 
+        #  duration_id: 
+        fan_timer:
+        # fan_id - fan entity (fan or switch domain)
+        # timer_id - timer helper
+        # duration_id - input_number helper for user duration input
+        light_motion:
+        # motion_id - motion sensor (binary_sensor)
+        # light_id - related light entity (light or switch domain)
+        # brightness_id - Adaptive Lighting brightness (switch.adaptive_lighting_[room].brightness_pct)
+        # timer_id - timer helper
+        # duration_id - input_number helper for user duration input
+            - name: Master Closet
+              motion_id: binary_sensor.master_closet_motion
+              light_id: switch.master_closet_main_lights
+              brightness_id: null
+              timer_id: null
+              duration_id: null
+        light_sync:
+        # master_id - master light entity (light or switch domain)
+        # slave_id - related light entity (light or switch domain)
+        timer_cancel:
+        # slave_id - related light entity (light, fan, or switch domain)
+        # timer_id - timer helper
+        timer_finished:
+        # slave_id - related light entity (light, fan, or switch domain)
+        # timer_id - timer helper

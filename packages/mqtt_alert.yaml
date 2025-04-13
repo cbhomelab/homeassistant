@@ -1,0 +1,26 @@
+mqtt:
+  camera:
+    - topic: BlueIris/image/front-yard
+      name: Alert Front Yard
+      unique_id: front_yard_alert
+      image_encoding: b64
+    - topic: BlueIris/image/back-yard
+      name: Alert Back Yard
+      unique_id: back_yard_alert
+      image_encoding: b64
+    - topic: BlueIris/image/violet-bedroom
+      name: Alert Violet Bedroom
+      unique_id: violet_bedroom_alert
+      image_encoding: b64
+    - topic: BlueIris/image/baby-monitor
+      name: Alert Baby Monitor
+      unique_id: baby_monitor_alert
+      image_encoding: b64
+    - topic: BlueIris/image/garage
+      name: Alert Garage
+      unique_id: garage_alert
+      image_encoding: b64
+    - topic: BlueIris/image/front-door
+      name: Alert Front Door
+      unique_id: front_door_alert
+      image_encoding: b64

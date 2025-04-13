@@ -1,0 +1,21 @@
+notify:
+  - platform: group
+    name: notify_mobile_all
+    services:
+      - service: mobile_app_christian_s_phone
+      - service: mobile_app_allys_phone
+      - service: mobile_app_carleys_phone
+      - service: mobile_app_kellys_phone
+  - platform: group
+    name: notify_mobile_laundry
+    services:
+      - service: mobile_app_allys_phone
+      - service: mobile_app_carleys_phone
+  - platform: group
+    name: notify_mobile_mail
+    services:
+      - service: mobile_app_allys_phone
+  - platform: group
+    name: notify_mobile_garage
+    services:
+      - service: mobile_app_christian_s_phone

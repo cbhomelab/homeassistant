@@ -1,0 +1,5 @@
+overseerr:
+  host: 10.40.0.99
+  port: 5055
+  api_key: MTcwODU3OTUzMzYzOWEzNDNkMDc2LTc4NDItNGNiOC1iMmI5LTA1NGRiYzIwZjViNw==
+  scan_interval: 600
